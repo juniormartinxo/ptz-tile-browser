@@ -6,7 +6,7 @@ Uma **faca** é um item de script (`media/scripts`) com a tag `sharpknife` (afia
 
 Total mapeado: **39 facas** (32 afiadas e 7 cegas) de 4 origens (36 do jogo base), 37 com nome em PT-BR, 0 alteradas por outro mod e 0 ocultas por padrão na aba Itens. A de maior dano é Facão (`Base.Machete`), com `MaxDamage` 3.
 
-As outras 29 armas de lâmina curta (`base:smallblade` sem as tags) e os itens que só têm "knife", "faca", "canivete", "dagger" ou "adaga" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).
+As outras 29 armas de lâmina curta (`base:smallblade` sem as tags) e os itens que só têm "knife", "faca", "canivete", "dagger", "adaga", "cleaver" ou "cutelo" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).
 
 ## Como as facas são mapeadas
 
@@ -45,7 +45,7 @@ window.PZ_ITEMS = {
 
 ## Por classe
 
-A classe não é um campo do jogo: é dada pela tag (`sharpknife` ou `dullknife`), pelo tipo do item e pela perícia da arma em `Categories`, por uma tabela mantida no script. O script falha se aparecer uma faca que nenhuma classe reconhece, uma classe sem facas ou um item com as duas tags. Tags com `knife` nas facas: `base:sharpknife` 32, `base:dullknife` 7. "Dano" é a faixa de `MinDamage`–`MaxDamage` e "Peso" a de `Weight`.
+A classe não é um campo do jogo: é dada pela tag (`sharpknife` ou `dullknife`), pelo tipo do item e pela perícia da arma em `Categories`, por uma tabela mantida no script. "Afiada" e "Cega" vêm só da tag, não do dano nem do nome (ex.: `Base.SharpBone_Long`, "Osso Longo e Afiado", tem `dullknife`). O script falha se aparecer uma faca que nenhuma classe reconhece, uma classe sem facas ou um item com as duas tags. Tags com `knife` nas facas: `base:sharpknife` 32, `base:dullknife` 7. "Dano" é a faixa de `MinDamage`–`MaxDamage` e "Peso" a de `Weight`.
 
 | Classe | Regra | Facas | Dano | Peso |
 | --- | --- | ---: | --- | ---: |
@@ -145,50 +145,50 @@ As 58 chaves que aparecem em `props` das facas, da mais comum à mais rara. Na a
 
 ## Catálogo
 
-Todas as facas por classe; nas que são armas, do maior dano para o menor, e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: dano é `MinDamage`–`MaxDamage`, alcance é `MaxRange`, crítico é `CriticalChance`, velocidade é `BaseSpeed` (— quando falta), peso é `Weight` e condição é `ConditionMax`. "Usos" lista quais destas tags a faca tem: `butcheranimal`, `killanimal`, `cutplant` e `sharpenable`.
+Todas as facas por classe; nas que são armas, do maior dano para o menor, e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: dano é `MinDamage`–`MaxDamage`, alcance é `MaxRange`, crítico é `CriticalChance`, velocidade é `BaseSpeed` (a coluna só aparece na classe em que alguma faca o tem), peso é `Weight` e condição é `ConditionMax`. "Usos" lista quais destas tags a faca tem: `butcheranimal`, `killanimal`, `cutplant` e `sharpenable`.
 
 ### Afiada, lâmina curta
 
-| Nome | ID | Origem | Categoria | Dano | Alcance | Crítico % | Velocidade | Peso | Condição | Usos |
-| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Faca Tática Lendária | `LTW.LegendaryTacticalKnife` | Legendary Tactical Weapons | Arma | 1–2 | 1 | 55 | — | 0.8 | 100 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| _M9 Bayonet_ | `ALICE.M9Bayonet` | ALICE Gear | Arma | 1.2–2 | 1.2 | 50 | — | 0.46 | 25 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Adaga com Guarda | `Base.HandguardDagger` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | — | 1 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Caça | `Base.HuntingKnife` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Caça | `Base.HuntingKnifeForged` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Combate | `Base.FightingKnife` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca Longa Simples de Metal | `Base.LongCrudeKnife` | vanilla | Arma - Artesanal | 0.6–1.2 | 0.9 | 50 | — | 1 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| _M9 Bayonet_ | `Base.M9_Bayonet` | Vanilla Weapons Plus - Gunworks Edition | Arma | 0.6–1.2 | 0.9 | 50 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Lâmina de Facão | `Base.MacheteKnife` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 30 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca Grande | `Base.LargeKnife` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 30 | — | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca Grande de Sucata Metálica | `Base.LargeKnife_Scrap` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 20 | — | 1 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Faca Longa de Pedra | `Base.StoneKnifeLong` | vanilla | Arma - Artesanal | 0.7–1.1 | 0.85 | 20 | — | 1 | 6 | `butcheranimal`, `killanimal` |
-| Faca Simples de Metal | `Base.CrudeKnife` | vanilla | Arma - Artesanal | 0.5–0.9 | 0.9 | 25 | — | 0.7 | 6 | `sharpenable` |
-| Faca de Churrasco | `Base.SteakKnife` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | — | 0.5 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Cozinha | `Base.KitchenKnife` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | — | 0.7 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Cozinha | `Base.KitchenKnifeForged` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | — | 0.6 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Cravo Ferroviário | `Base.RailroadSpikeKnife` | vanilla | Arma | 0.3–0.7 | 0.9 | 25 | — | 0.5 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Sushi | `Base.KnifeSushi` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | — | 0.7 | 15 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Canivete | `Base.KnifePocket` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 20 | — | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Canivete Automático | `Base.SwitchKnife` | vanilla | Arma | 0.3–0.6 | 0.9 | 20 | — | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Canivete Borboleta | `Base.KnifeButterfly` | vanilla | Arma | 0.3–0.6 | 0.9 | 20 | — | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Faca de Pedra | `Base.FlintKnife` | vanilla | Arma - Artesanal | 0.4–0.6 | 0.69 | 20 | — | 0.75 | 6 | `butcheranimal`, `killanimal` |
-| Faca Pequena | `Base.SmallKnife` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 20 | — | 0.5 | 8 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Multiferramenta | `Base.Multitool` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 25 | — | 0.5 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
-| Faca de Filetar | `Base.KnifeFillet` | vanilla | Culinária / Arma | 0.3–0.5 | 0.9 | 10 | — | 0.7 | 5 | `butcheranimal`, `sharpenable` |
-| Handiknife | `Base.Handiknife` | vanilla | Ferramenta / Arma | 0.3–0.5 | 0.9 | 25 | — | 0.4 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
-| Faca de Descascar | `Base.KnifeParing` | vanilla | Culinária / Arma | 0.3–0.4 | 0.8 | 10 | — | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Nome | ID | Origem | Categoria | Dano | Alcance | Crítico % | Peso | Condição | Usos |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| Faca Tática Lendária | `LTW.LegendaryTacticalKnife` | Legendary Tactical Weapons | Arma | 1–2 | 1 | 55 | 0.8 | 100 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| _M9 Bayonet_ | `ALICE.M9Bayonet` | ALICE Gear | Arma | 1.2–2 | 1.2 | 50 | 0.46 | 25 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Adaga com Guarda | `Base.HandguardDagger` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | 1 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Caça | `Base.HuntingKnife` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Caça | `Base.HuntingKnifeForged` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Combate | `Base.FightingKnife` | vanilla | Arma | 0.6–1.2 | 0.9 | 50 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca Longa Simples de Metal | `Base.LongCrudeKnife` | vanilla | Arma - Artesanal | 0.6–1.2 | 0.9 | 50 | 1 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| _M9 Bayonet_ | `Base.M9_Bayonet` | Vanilla Weapons Plus - Gunworks Edition | Arma | 0.6–1.2 | 0.9 | 50 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Lâmina de Facão | `Base.MacheteKnife` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 30 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca Grande | `Base.LargeKnife` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 30 | 1 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca Grande de Sucata Metálica | `Base.LargeKnife_Scrap` | vanilla | Ferramenta / Arma | 0.6–1.1 | 0.9 | 20 | 1 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Faca Longa de Pedra | `Base.StoneKnifeLong` | vanilla | Arma - Artesanal | 0.7–1.1 | 0.85 | 20 | 1 | 6 | `butcheranimal`, `killanimal` |
+| Faca Simples de Metal | `Base.CrudeKnife` | vanilla | Arma - Artesanal | 0.5–0.9 | 0.9 | 25 | 0.7 | 6 | `sharpenable` |
+| Faca de Churrasco | `Base.SteakKnife` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | 0.5 | 5 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Cozinha | `Base.KitchenKnife` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | 0.7 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Cozinha | `Base.KitchenKnifeForged` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | 0.6 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Cravo Ferroviário | `Base.RailroadSpikeKnife` | vanilla | Arma | 0.3–0.7 | 0.9 | 25 | 0.5 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Sushi | `Base.KnifeSushi` | vanilla | Culinária / Arma | 0.3–0.7 | 0.9 | 25 | 0.7 | 15 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Canivete | `Base.KnifePocket` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 20 | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Canivete Automático | `Base.SwitchKnife` | vanilla | Arma | 0.3–0.6 | 0.9 | 20 | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Canivete Borboleta | `Base.KnifeButterfly` | vanilla | Arma | 0.3–0.6 | 0.9 | 20 | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Faca de Pedra | `Base.FlintKnife` | vanilla | Arma - Artesanal | 0.4–0.6 | 0.69 | 20 | 0.75 | 6 | `butcheranimal`, `killanimal` |
+| Faca Pequena | `Base.SmallKnife` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 20 | 0.5 | 8 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Multiferramenta | `Base.Multitool` | vanilla | Ferramenta / Arma | 0.3–0.6 | 0.9 | 25 | 0.5 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
+| Faca de Filetar | `Base.KnifeFillet` | vanilla | Culinária / Arma | 0.3–0.5 | 0.9 | 10 | 0.7 | 5 | `butcheranimal`, `sharpenable` |
+| Handiknife | `Base.Handiknife` | vanilla | Ferramenta / Arma | 0.3–0.5 | 0.9 | 25 | 0.4 | 10 | `butcheranimal`, `killanimal`, `cutplant`, `sharpenable` |
+| Faca de Descascar | `Base.KnifeParing` | vanilla | Culinária / Arma | 0.3–0.4 | 0.8 | 10 | 0.3 | 10 | `butcheranimal`, `cutplant`, `sharpenable` |
 
 ### Cega, lâmina curta
 
-| Nome | ID | Origem | Categoria | Dano | Alcance | Crítico % | Velocidade | Peso | Condição | Usos |
-| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Osso Longo e Afiado | `Base.SharpBone_Long` | vanilla | Arma - Artesanal | 0.6–1 | 0.85 | 20 | — | 1 | 5 | — |
-| Faca de Manteiga | `Base.ButterKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | — | 0.25 | 3 | — |
-| Faca de Manteiga de Ouro | `Base.ButterKnife_Gold` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | — | 0.25 | 1 | — |
-| Faca de Manteiga de Prata | `Base.ButterKnife_Silver` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | — | 0.25 | 2 | — |
-| Faca de Osso Cega | `Base.DullBoneKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | — | 0.25 | 1 | — |
-| Faca de Pão | `Base.BreadKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 1 | 15 | — | 1 | 5 | — |
+| Nome | ID | Origem | Categoria | Dano | Alcance | Crítico % | Peso | Condição | Usos |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| Osso Longo e Afiado | `Base.SharpBone_Long` | vanilla | Arma - Artesanal | 0.6–1 | 0.85 | 20 | 1 | 5 | — |
+| Faca de Manteiga | `Base.ButterKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | 0.25 | 3 | — |
+| Faca de Manteiga de Ouro | `Base.ButterKnife_Gold` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | 0.25 | 1 | — |
+| Faca de Manteiga de Prata | `Base.ButterKnife_Silver` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | 0.25 | 2 | — |
+| Faca de Osso Cega | `Base.DullBoneKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 0.8 | 7 | 0.25 | 1 | — |
+| Faca de Pão | `Base.BreadKnife` | vanilla | Culinária / Arma | 0.1–0.4 | 1 | 15 | 1 | 5 | — |
 
 ### Afiada, lâmina longa
 
@@ -208,7 +208,7 @@ Todas as facas por classe; nas que são armas, do maior dano para o menor, e dep
 
 ## Fora do catálogo
 
-Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:smallblade` em `Categories`) ou que têm "knife", "faca", "canivete", "dagger" ou "adaga" no ID ou no nome: 58 itens, 29 deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. As receitas que pedem uma faca por `tags[base:sharpknife]` ou `tags[base:dullknife]` não aceitam nenhum deles.
+Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:smallblade` em `Categories`) ou que têm "knife", "faca", "canivete", "dagger", "adaga", "cleaver" ou "cutelo" no ID ou no nome: 63 itens, 29 deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. Uma receita pode aceitar alguns deles no mesmo slot da faca (ex.: `tags[base:sharpknife;base:scissors]`), mas eles não têm as tags de faca.
 
 | Nome | ID | Origem | Tipo | Categoria | Por quê |
 | --- | --- | --- | --- | --- | --- |
@@ -244,6 +244,11 @@ Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:sm
 | Bainha de Faca Lendária (Costas) | `LTW.LegendaryKnifeSheathBack` | Legendary Tactical Weapons | `clothing` | Acessório | nome |
 | Bainha de Faca Lendária (Coxa direita) | `LTW.LegendaryKnifeSheathRightThigh` | Legendary Tactical Weapons | `clothing` | Acessório | nome |
 | Chapéu de Brincadeira - Faca | `Base.Hat_JokeKnife` | vanilla | `clothing` | Lembrança | nome |
+| Cutelo de Carne | `Base.MeatCleaver` | vanilla | `weapon` | Culinária / Arma | nome |
+| Cutelo de Carne | `Base.MeatCleaverForged` | vanilla | `weapon` | Culinária / Arma | nome |
+| Cutelo de Sucata Metálica | `Base.MeatCleaver_Scrap` | vanilla | `weapon` | Arma - Artesanal | nome |
+| Cutelo-Machado de Sucata Metálica | `Base.Axe_ScrapCleaver` | vanilla | `weapon` | Arma - Artesanal | nome |
+| Lâmina de Cutelo de Carne | `Base.MeatCleaverBlade` | vanilla | `normal` | Material | nome |
 | Lâmina de Faca de Caça | `Base.HuntingKnifeBlade` | vanilla | `normal` | Material | nome |
 | Lâmina de Faca de Cozinha | `Base.KitchenKnifeBlade` | vanilla | `normal` | Material | nome |
 | Lâmina de Faca Grande | `Base.LargeKnifeBlade` | vanilla | `normal` | Material | nome |
