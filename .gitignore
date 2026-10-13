@@ -1,0 +1,12 @@
+# Generated map tiles (~45 GB) - regenerate with tools/pzmap2dzi
+map/
+atlas/
+
+# External tool clone (github.com/cff29546/pzmap2dzi); local config kept in tools/pzmap2dzi.conf.yaml
+tools/pzmap2dzi/
+
+backups/
+__pycache__/
+*.pyc
+node_modules/
+tools/render_*.txt

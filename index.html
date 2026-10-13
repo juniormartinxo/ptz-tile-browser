@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PZ Tile Browser</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+  :root {
+    --bg: #14161a; --bg2: #1c1f25; --bg3: #242830; --line: #2e333d; --fg: #e6e8ec; --fg2: #9aa3b2; --fg3: #6b7383;
+    --acc: #e0a437; --acc2: #7fb069; --sel: #3a4a6a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, "Segoe UI", sans-serif; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+  header { padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  header h1 { font-size: 15px; margin: 0 8px 0 0; font-weight: 600; letter-spacing: .3px; white-space: nowrap; }
+  header h1 small { color: var(--fg3); font-weight: 400; margin-left: 6px; }
+  #q { flex: 1 1 320px; min-width: 200px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 15px; outline: none; }
+  #q:focus { border-color: var(--acc); }
+  select, button { background: var(--bg3); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--fg3); }
+  button.primary { background: var(--acc); color: #1a1408; border-color: transparent; font-weight: 600; }
+  #status { color: var(--fg2); white-space: nowrap; }
+  main { display: grid; grid-template-columns: 230px 1fr; min-height: 0; }
+  main.with-panel { grid-template-columns: 230px 1fr 380px; }
+  aside { border-right: 1px solid var(--line); overflow: auto; padding: 12px; background: var(--bg2); }
+  aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--fg3); margin: 14px 0 6px; }
+  aside h3:first-child { margin-top: 0; }
+  .chip { display: flex; justify-content: space-between; gap: 6px; padding: 4px 8px; border-radius: 6px; cursor: pointer; color: var(--fg2); font-size: 13px; user-select: none; }
+  .chip:hover { background: var(--bg3); color: var(--fg); }
+  .chip.on { background: var(--sel); color: var(--fg); }
+  .chip span:last-child { color: var(--fg3); font-variant-numeric: tabular-nums; }
+  #grid-wrap { overflow: auto; padding: 12px; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 10px; align-content: start; }
+  .card { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+  .card:hover { border-color: var(--fg3); }
+  .card.sel { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
+  .thumb { width: 64px; height: 128px; position: relative; overflow: hidden; flex: none;
+    background-image: linear-gradient(45deg, #1a1d22 25%, transparent 25%), linear-gradient(-45deg, #1a1d22 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1a1d22 75%), linear-gradient(-45deg, transparent 75%, #1a1d22 75%);
+    background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; background-color: #22262d; border-radius: 4px; }
+  .thumb .img { position: absolute; left: 0; top: 0; transform-origin: 0 0; image-rendering: pixelated; }
+  .thumb .noimg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--fg3); font-size: 11px; }
+  .card .name { font-size: 12.5px; font-weight: 600; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card .id { font-size: 10.5px; color: var(--fg3); font-family: ui-monospace, Consolas, monospace; width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card .tags { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 999px; background: var(--bg3); color: var(--fg2); border: 1px solid var(--line); }
+  .tag.fn { color: var(--acc2); border-color: #2f4a2c; }
+  #more { grid-column: 1 / -1; text-align: center; color: var(--fg3); padding: 14px; }
+  #panel { border-left: 1px solid var(--line); background: var(--bg2); overflow: auto; padding: 14px; display: none; }
+  main.with-panel #panel { display: block; }
+  #panel .big { width: 128px; height: 256px; margin: 0 auto 10px; }
+  #panel .big .img { transform: none; }
+  #panel h2 { font-size: 17px; margin: 0 0 2px; }
+  #panel .sub { color: var(--fg2); font-size: 13px; margin-bottom: 8px; }
+  #panel code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--bg); padding: 2px 6px; border-radius: 5px; color: var(--acc); word-break: break-all; }
+  #panel .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  #panel table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  #panel td { padding: 3px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  #panel td:first-child { color: var(--fg2); white-space: nowrap; width: 40%; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  #panel td:last-child { word-break: break-all; }
+  #panel .close { float: right; }
+  .hint { color: var(--fg3); font-size: 12px; margin-top: 10px; line-height: 1.5; }
+  kbd { background: var(--bg3); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 11px; }
+  #tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+  #tabs .tab { border: 0; background: transparent; color: var(--fg2); padding: 5px 12px; border-radius: 6px; }
+  #tabs .tab.on { background: var(--sel); color: var(--fg); }
+  #tabs a.tab { text-decoration: none; display: inline-flex; align-items: center; font-size: 14px; }
+  #tabs a.tab:hover { color: var(--fg); }
+  #meta { color: var(--fg3); }
+  body.view-vehicles #main, body.view-vehicles .tiles-only { display: none !important; }
+  body:not(.view-vehicles) #vmain, body:not(.view-vehicles) .vehicles-only { display: none !important; }
+  body.view-items #main, body.view-items .tiles-only { display: none !important; }
+  body:not(.view-items) #imain, body:not(.view-items) .items-only { display: none !important; }
+  #igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; align-content: start; }
+  .icard { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 8px; cursor: pointer; min-width: 0; display: flex; gap: 10px; align-items: flex-start; }
+  .icard:hover { border-color: var(--fg3); } .icard.sel { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
+  .icard .ibody { min-width: 0; flex: 1; }
+  .icard .name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .icard .id { font-size: 10.5px; color: var(--fg3); font-family: ui-monospace, Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ithumb { width: 48px; height: 48px; flex: none; position: relative; overflow: hidden; border-radius: 6px; background: #22262d; }
+  .ithumb.big { width: 96px; height: 96px; margin: 0 auto 10px; }
+  .ithumb .img { position: absolute; transform-origin: 0 0; image-rendering: pixelated; }
+  .ithumb .iimg { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+  .ithumb .noimg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--fg3); font-size: 10px; text-align: center; }
+  .more { grid-column: 1 / -1; text-align: center; color: var(--fg3); padding: 14px; }
+  #ipanel { border-left: 1px solid var(--line); background: var(--bg2); overflow: auto; padding: 14px; display: none; }
+  #imain.with-panel #ipanel { display: block; }
+  #ipanel h2 { font-size: 17px; margin: 0 0 2px; } #ipanel .sub { color: var(--fg2); font-size: 13px; margin-bottom: 8px; }
+  #ipanel code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--bg); padding: 2px 6px; border-radius: 5px; color: var(--acc); word-break: break-all; }
+  #ipanel .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; } #ipanel .close { float: right; }
+  #ipanel table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  #ipanel td { padding: 3px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  #ipanel td:first-child { color: var(--fg2); white-space: nowrap; width: 40%; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  #ipanel td:last-child { word-break: break-all; }
+  #vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; align-content: start; }
+  .vcard { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 8px; cursor: pointer; min-width: 0; }
+  .vcard:hover { border-color: var(--fg3); } .vcard.sel { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
+  .vthumb { width: 100%; aspect-ratio: 2 / 1; border-radius: 6px; background: #22262d center / cover no-repeat; margin-bottom: 6px; image-rendering: auto; }
+  .vcard .name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vcard .id { font-size: 10.5px; color: var(--fg3); font-family: ui-monospace, Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vstats { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+  .vstats .tag b { color: var(--fg); font-weight: 600; }
+  #vpanel .vthumb { aspect-ratio: 1 / 1; background-size: contain; }
+  .v3d { width: 100%; height: 300px; border-radius: 8px; background: radial-gradient(ellipse at 50% 60%, #2a2f38, #14161a 70%); position: relative; overflow: hidden; margin-bottom: 10px; }
+  .v3d canvas { display: block; width: 100% !important; height: 100% !important; }
+  .v3d .msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--fg3); font-size: 12px; text-align: center; padding: 10px; }
+  .v3d .tools { position: absolute; right: 6px; top: 6px; display: flex; gap: 4px; } .v3d .tools button { padding: 3px 8px; font-size: 11px; }
+  #vpanel .skins { display: flex; gap: 4px; flex-wrap: wrap; } #vpanel .skins img { width: 56px; height: 56px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); }
+  .bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--acc2); }
+  #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--acc); color: #1a1408; padding: 8px 14px; border-radius: 8px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  #toast.show { opacity: 1; }
+  @media (max-width: 900px) { main, main.with-panel { grid-template-columns: 1fr; } aside { display: none; } #panel { position: fixed; inset: auto 0 0 0; max-height: 70vh; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>PZ Browser</h1>
+  <nav id="tabs"><button class="tab on" data-tab="tiles">Tiles</button><button class="tab" data-tab="vehicles">Veículos</button><button class="tab" data-tab="items">Itens</button><a class="tab" id="maplink" href="map/html/pzmap.html?x=10700&y=9950&z=0&zoom=16" target="_blank" title="Mapa isométrico das cidades vanilla (precisa de node serve.js)">Mapa ↗</a></nav>
+  <small id="meta"></small>
+  <input id="q" type="search" placeholder="Buscar: nome, função, tileset, propriedade…  (ex.: lustre, generator, container=fridge, ts:lighting_indoor, mod:atlanta)" autofocus>
+  <select id="lang" class="tiles-only"><option value="pt">Nomes PT-BR</option><option value="en">Nomes EN</option></select>
+  <select id="sort" class="tiles-only"><option value="ts">Ordem: tileset</option><option value="name">Ordem: nome</option></select>
+  <select id="vsort" class="vehicles-only"><option value="name">Ordem: nome</option><option value="trunk">Ordem: porta-malas</option><option value="speed">Ordem: velocidade</option><option value="engine">Ordem: motor</option><option value="seats">Ordem: assentos</option><option value="mass">Ordem: massa</option></select>
+  <label class="vehicles-only" style="color:var(--fg2);font-size:13px"><input type="checkbox" id="vwreck"> destruídos</label>
+  <select id="isort" class="items-only"><option value="name">Ordem: nome</option><option value="weight">Ordem: peso</option><option value="dmg">Ordem: dano</option><option value="cal">Ordem: calorias</option><option value="cap">Ordem: capacidade</option></select>
+  <label class="items-only" style="color:var(--fg2);font-size:13px" title="ferimentos, curativos no corpo, maquiagem, itens obsoletos"><input type="checkbox" id="iinternal"> internos</label>
+  <button id="clear">Limpar filtros</button>
+  <span id="status"></span>
+</header>
+<main id="main">
+  <aside>
+    <h3>Função</h3><div id="f-fn"></div>
+    <h3>Material</h3><div id="f-mat"></div>
+    <h3>Origem</h3><div id="f-src"></div>
+    <h3>Tileset (top)</h3><div id="f-ts"></div>
+    <div class="hint"><kbd>/</kbd> busca · <kbd>Esc</kbd> fecha painel · clique num tile pra ver propriedades e copiar o nome. Filtros na mesma seção são OU; entre seções, E.</div>
+  </aside>
+  <div id="grid-wrap"><div id="grid"></div></div>
+  <div id="panel"></div>
+</main>
+<main id="vmain">
+  <aside>
+    <h3>Tipo</h3><div id="v-type"></div>
+    <h3>Assentos</h3><div id="v-seats"></div>
+    <h3>Origem</h3><div id="v-mod"></div>
+    <div class="hint">Busca aceita <code>mod:ki5</code>, <code>seats:6</code>, <code>trunk>100</code>, <code>speed>120</code>, <code>-trailer</code>. Clique num veículo pra ver tudo e copiar o comando de spawn.</div>
+  </aside>
+  <div id="grid-wrap-v" style="overflow:auto;padding:12px"><div id="vgrid"></div></div>
+  <div id="vpanel" style="border-left:1px solid var(--line);background:var(--bg2);overflow:auto;padding:14px;display:none"></div>
+</main>
+<main id="imain">
+  <aside>
+    <h3>Tipo</h3><div id="i-type"></div>
+    <h3>Origem</h3><div id="i-mod"></div>
+    <h3>Categoria</h3><div id="i-cat"></div>
+    <div class="hint">Busca aceita <code>cat:comida</code>, <code>type:arma</code>, <code>tag:sharpknife</code>, <code>mod:ki5</code>, <code>dmg>2</code>, <code>weight&lt;0.5</code>, <code>cal>300</code>, <code>cap>=20</code>, <code>k:Propriedade</code>, <code>ammotype=9mm</code>, <code>-palavra</code>.</div>
+  </aside>
+  <div id="grid-wrap-i" style="overflow:auto;padding:12px"><div id="igrid"></div></div>
+  <div id="ipanel"></div>
+</main>
+<div id="toast"></div>
+<script src="data/tiles.js"></script>
+<script src="data/vehicles.js?v=20260920-tanks3"></script>
+<script>
+(() => {
+  const D = window.PZ_TILES;
+  if (!D) { document.body.innerHTML = '<p style="padding:20px">data/tiles.js não encontrado — rode <code>node build.js</code>.</p>'; return; }
+  const $ = s => document.querySelector(s);
+  const TS = D.tilesets, PAGES = D.pages;
+
+  // ---------- funções (categorias) derivadas das propriedades ----------
+  const FN = [
+    ['Contêiner', p => 'container' in p],
+    ['Cama', p => 'bed' in p],
+    ['Iluminação', p => 'lightswitch' in p || 'LightRadius' in p],
+    ['Poste / luz externa', p => 'streetlight' in p],
+    ['Fogão / forno', p => p.IsoType === 'IsoStove' || p.container === 'stove' || p.container === 'microwave' || p.container === 'woodstove'],
+    ['Geladeira', p => p.container === 'fridge' || p.container === 'freezer'],
+    ['Fogueira / churrasqueira / lareira', p => p.IsoType === 'IsoBarbecue' || p.IsoType === 'IsoFireplace' || p.container === 'campfire'],
+    ['Rádio / TV', p => p.IsoType === 'IsoRadio' || p.IsoType === 'IsoTelevision'],
+    ['Gerador', p => (p.CustomItem || '').includes('Generator') || 'GeneratorSound' in p],
+    ['Porta', p => 'door' in p || 'doorFrN' in p || 'doorFrW' in p || 'DoorWallN' in p || 'DoorWallW' in p || 'garagedoor' in p || 'GarageDoor' in p],
+    ['Janela', p => 'window' in p || 'WindowN' in p || 'WindowW' in p || 'windowFN' in p || 'windowFW' in p],
+    ['Parede', p => 'WallN' in p || 'WallW' in p || 'WallNW' in p || 'WallSE' in p || 'wall' in p || 'WallNTrans' in p || 'WallWTrans' in p],
+    ['Cerca / grade', p => 'HoppableN' in p || 'HoppableW' in p || 'fence' in p || 'WestRailing' in p || 'NorthRailing' in p],
+    ['Piso', p => 'solidfloor' in p],
+    ['Telhado', p => 'WestRoofT' in p || 'WestRoofM' in p || 'WestRoofB' in p || 'RoofGroup' in p || 'roof' in p || 'NorthRoofT' in p],
+    ['Escada', p => Object.keys(p).some(k => /^stairs[TMB][NW]$/.test(k))],
+    ['Árvore / vegetação', p => 'tree' in p || 'vegitation' in p],
+    ['Mesa / superfície', p => 'IsTable' in p || 'GenericCraftingSurface' in p || 'Surface' in p],
+    ['Móvel (pode pegar)', p => 'IsMoveAble' in p],
+    ['Água', p => 'waterAmount' in p || 'waterPiped' in p || 'water' in p || p.IsoType === 'IsoFeedingTrough'],
+    ['Sinal / placa', p => 'signal' in p || (p.CustomName || '').toLowerCase().includes('sign')],
+    ['Quebra ao bater (carro)', p => 'HitByCar' in p],
+    ['Sem propriedades', p => Object.keys(p).length === 0],
+  ];
+  const MATS = ['Wood', 'Metal', 'Electric', 'Glass', 'Fabric', 'Stone', 'Plastic', 'Leather', 'Paper', 'Ceramic', 'Rubber', 'Concrete'];
+  const MAT = MATS.map(m => [m, p => [p.Material, p.Material2, p.Material3].includes(m)]);
+
+  // ---------- pré-processamento ----------
+  const rows = D.tiles.map((r, i) => {
+    const [name, ts, idx, pg, rect, props, pt, en] = r;
+    const src = TS[ts].source;
+    const fn = []; FN.forEach((f, k) => { if (f[1](props)) fn.push(k); });
+    const mat = []; MAT.forEach((f, k) => { if (f[1](props)) mat.push(k); });
+    const propsStr = Object.entries(props).map(([k, v]) => v ? k + '=' + v : k).join(' ');
+    const hay = (name + ' ' + pt + ' ' + en + ' ' + TS[ts].name + ' ' + propsStr + ' ' + fn.map(k => FN[k][0]).join(' ')).toLowerCase();
+    return { i, name, ts, idx, pg, rect, props, pt, en, src, fn, mat, hay, propsStr: propsStr.toLowerCase() };
+  });
+  const display = r => (lang === 'pt' && r.pt) ? r.pt : (r.en || humanize(r.name));
+  function humanize(n) { return n.replace(/_(\d+)$/, ' #$1').replace(/_/g, ' '); }
+
+  // ---------- estado ----------
+  let lang = 'pt', sort = 'ts', q = '';
+  const sel = { fn: new Set(), mat: new Set(), src: new Set(), ts: new Set() };
+  let selected = null, shown = 0, result = [];
+  const PAGE = 240;
+
+  // ---------- filtros laterais ----------
+  function buildChips() {
+    const cnt = { fn: {}, mat: {}, src: {}, ts: {} };
+    for (const r of rows) {
+      r.fn.forEach(k => cnt.fn[k] = (cnt.fn[k] || 0) + 1);
+      r.mat.forEach(k => cnt.mat[k] = (cnt.mat[k] || 0) + 1);
+      cnt.src[r.src] = (cnt.src[r.src] || 0) + 1;
+      cnt.ts[r.ts] = (cnt.ts[r.ts] || 0) + 1;
+    }
+    const mk = (el, group, items) => {
+      el.innerHTML = '';
+      for (const [key, label, n] of items) {
+        const d = document.createElement('div'); d.className = 'chip'; d.dataset.group = group; d.dataset.key = key;
+        d.innerHTML = `<span>${label}</span><span>${n}</span>`;
+        d.onclick = () => { const s = sel[group]; s.has(key) ? s.delete(key) : s.add(key); d.classList.toggle('on', s.has(key)); refresh(); };
+        el.appendChild(d);
+      }
+    };
+    mk($('#f-fn'), 'fn', FN.map((f, k) => [String(k), f[0], cnt.fn[k] || 0]).filter(x => x[2]));
+    mk($('#f-mat'), 'mat', MAT.map((f, k) => [String(k), f[0], cnt.mat[k] || 0]).filter(x => x[2]));
+    mk($('#f-src'), 'src', Object.entries(cnt.src).sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, k, n]));
+    mk($('#f-ts'), 'ts', Object.entries(cnt.ts).sort((a, b) => b[1] - a[1]).slice(0, 60).map(([k, n]) => [k, TS[k].name, n]));
+  }
+
+  // ---------- busca ----------
+  function matches(r, tokens) {
+    for (const t of tokens) {
+      if (t.startsWith('ts:')) { if (!TS[r.ts].name.toLowerCase().includes(t.slice(3))) return false; continue; }
+      if (t.startsWith('mod:')) { if (!r.src.toLowerCase().includes(t.slice(4))) return false; continue; }
+      if (t.startsWith('k:')) { const k = t.slice(2); if (!Object.keys(r.props).some(x => x.toLowerCase() === k)) return false; continue; }
+      if (t.includes('=')) { const [k, v] = t.split('='); if (!Object.entries(r.props).some(([pk, pv]) => pk.toLowerCase() === k && pv.toLowerCase().includes(v))) return false; continue; }
+      if (t.startsWith('-')) { if (r.hay.includes(t.slice(1))) return false; continue; }
+      if (!r.hay.includes(t)) return false;
+    }
+    return true;
+  }
+  function refresh() {
+    const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+    result = rows.filter(r =>
+      (sel.fn.size === 0 || r.fn.some(k => sel.fn.has(String(k)))) &&
+      (sel.mat.size === 0 || r.mat.some(k => sel.mat.has(String(k)))) &&
+      (sel.src.size === 0 || sel.src.has(r.src)) &&
+      (sel.ts.size === 0 || sel.ts.has(String(r.ts))) &&
+      (tokens.length === 0 || matches(r, tokens)));
+    if (sort === 'name') result.sort((a, b) => display(a).localeCompare(display(b)) || a.idx - b.idx);
+    else result.sort((a, b) => a.ts - b.ts || a.idx - b.idx);
+    $('#status').textContent = result.length.toLocaleString('pt-BR') + ' tiles';
+    $('#grid').innerHTML = ''; shown = 0; renderMore();
+  }
+
+  // ---------- render ----------
+  const io = new IntersectionObserver(es => {
+    for (const e of es) if (e.isIntersecting) { const r = rows[e.target.dataset.i]; paint(e.target.querySelector('.thumb'), r, 0.5); io.unobserve(e.target); }
+  }, { rootMargin: '400px' });
+  function paint(thumb, r, scale) {
+    thumb.innerHTML = '';
+    if (!r.rect) { thumb.innerHTML = '<div class="noimg">sem imagem</div>'; return; }
+    const [x, y, w, h, ox, oy, fw, fh] = r.rect;
+    const s = Math.min(64 / fw, 128 / fh, 1) * (scale === 1 ? 2 : 1); // 2x tiles: 0.5 na grade, 1 no painel
+    const img = document.createElement('div'); img.className = 'img';
+    img.style.cssText = `width:${w}px;height:${h}px;left:${ox * s}px;top:${oy * s}px;transform:scale(${s});background-image:url("atlas/${PAGES[r.pg]}.png");background-position:-${x}px -${y}px;background-repeat:no-repeat`;
+    thumb.appendChild(img);
+  }
+  function card(r) {
+    const c = document.createElement('div'); c.className = 'card' + (selected === r ? ' sel' : ''); c.dataset.i = r.i;
+    const tags = r.fn.slice(0, 2).map(k => `<span class="tag fn">${FN[k][0]}</span>`).join('') + (r.src !== 'vanilla' ? `<span class="tag">${r.src}</span>` : '');
+    c.innerHTML = `<div class="thumb"></div><div class="name" title="${esc(display(r))}">${esc(display(r))}</div><div class="id" title="${r.name}">${r.name}</div><div class="tags">${tags}</div>`;
+    c.onclick = () => select(r, c);
+    io.observe(c);
+    return c;
+  }
+  function renderMore() {
+    const g = $('#grid'); const old = $('#more'); if (old) old.remove();
+    const frag = document.createDocumentFragment();
+    const end = Math.min(result.length, shown + PAGE);
+    for (let i = shown; i < end; i++) frag.appendChild(card(result[i]));
+    shown = end; g.appendChild(frag);
+    if (shown < result.length) { const m = document.createElement('div'); m.id = 'more'; m.textContent = `mostrando ${shown} de ${result.length} — role para carregar mais`; g.appendChild(m); moreIO.observe(m); }
+  }
+  const moreIO = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderMore(); }, { root: $('#grid-wrap'), rootMargin: '600px' });
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ---------- painel ----------
+  function select(r, c) {
+    selected = r;
+    document.querySelectorAll('.card.sel').forEach(x => x.classList.remove('sel'));
+    if (c) c.classList.add('sel');
+    const ts = TS[r.ts];
+    const p = $('#panel'); $('#main').classList.add('with-panel');
+    const propsRows = Object.entries(r.props).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v) || '<span style="color:var(--fg3)">(flag)</span>'}</td></tr>`).join('') || '<tr><td colspan=2 style="color:var(--fg3)">sem propriedades no tiledef</td></tr>';
+    p.innerHTML = `
+      <button class="close" id="close">✕</button>
+      <div class="thumb big"></div>
+      <h2>${esc(display(r))}</h2>
+      <div class="sub">${r.pt && r.en && r.pt !== r.en ? esc(lang === 'pt' ? r.en : r.pt) + ' · ' : ''}${esc(ts.name)} #${r.idx}${ts.cols ? ` · sheet ${ts.cols}×${ts.rows}` : ''} · ${esc(r.src)}${r.pg >= 0 ? ' · ' + esc(PAGES[r.pg]) : ''}</div>
+      <div><code id="tn">${r.name}</code></div>
+      <div class="row">
+        <button class="primary" data-copy="${r.name}">Copiar nome</button>
+        <button data-copy='getSprite("${r.name}")'>Copiar getSprite(...)</button>
+        <button id="see-ts">Ver tileset inteiro</button>
+      </div>
+      <div class="row">${r.fn.map(k => `<span class="tag fn">${FN[k][0]}</span>`).join('')}${r.mat.map(k => `<span class="tag">${MAT[k][0]}</span>`).join('')}</div>
+      <table>${propsRows}</table>
+      <div class="hint">No jogo (debug): Brush Tool → tile cursor com esse nome; ou no console Lua: <code>IsoSpriteManager.instance:getSprite("${r.name}")</code>.</div>`;
+    paint(p.querySelector('.thumb'), r, 1);
+    p.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copy(b.dataset.copy));
+    $('#close').onclick = () => { $('#main').classList.remove('with-panel'); selected = null; document.querySelectorAll('.card.sel').forEach(x => x.classList.remove('sel')); };
+    $('#see-ts').onclick = () => { clearAll(false); q = 'ts:' + ts.name.toLowerCase() + ' '; $('#q').value = q; refresh(); };
+  }
+  function copy(t) { navigator.clipboard.writeText(t).then(() => toast('Copiado: ' + t), () => { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('Copiado: ' + t); }); }
+  let toastT; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1400); }
+  function clearAll(doRefresh = true) { Object.values(sel).forEach(s => s.clear()); document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on')); q = ''; $('#q').value = ''; if (doRefresh) refresh(); }
+
+  // ---------- eventos ----------
+  let deb; $('#q').addEventListener('input', e => { if (/\bview-/.test(document.body.className)) return; clearTimeout(deb); deb = setTimeout(() => { q = e.target.value; refresh(); }, 120); });
+  $('#lang').onchange = e => { lang = e.target.value; refresh(); if (selected) select(selected); };
+  $('#sort').onchange = e => { sort = e.target.value; refresh(); };
+  $('#clear').onclick = () => clearAll();
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); $('#q').select(); }
+    if (e.key === 'Escape') { if (document.activeElement === $('#q') && $('#q').value) { clearAll(); } else if (selected) $('#close').click(); }
+  });
+
+  $('#meta').textContent = `${rows.length.toLocaleString('pt-BR')} tiles · ${TS.length} tilesets · gerado ${new Date(D.generated).toLocaleString('pt-BR')}`;
+  buildChips(); refresh();
+})();
+</script>
+<script src="data/items.js"></script>
+<script src="items.js"></script>
+<script src="vehicles.js?v=20260928-items"></script>
+</body>
+</html>
