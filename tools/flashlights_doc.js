@@ -31,7 +31,7 @@ if (noLight.length) throw new Error('lanternas sem LightStrength: ' + noLight.ma
 // lanternas, faz o script falhar, para a tabela nao ficar para tras quando os dados mudarem.
 const CLASS_RULES = [
   ['Com feixe', it => it.type === 'drainable' && yes(it.props.TorchCone), '`drainable` com `TorchCone = true`'],
-  ['Sem feixe', it => it.type === 'drainable' && !yes(it.props.TorchCone), '`drainable` com `TorchCone = false`'],
+  ['Sem feixe', it => it.type === 'drainable' && /^false$/i.test(it.props.TorchCone || ''), '`drainable` com `TorchCone = false`'],
   ['Para arma', it => it.type === 'weaponpart', '`weaponpart`'],
 ];
 const CLASSES = CLASS_RULES.map(c => c[0]);
@@ -56,7 +56,7 @@ for (const it of F) {
 const srcOrder = Object.keys(bySrc).sort((a, b) => (a === 'vanilla' ? -1 : b === 'vanilla' ? 1 : bySrc[b].n - bySrc[a].n || a.localeCompare(b)));
 const withPt = F.filter(it => it.pt).length, nHidden = F.filter(hidden).length;
 const nOvr = F.filter(it => it.ovr.length).length;
-const byName = (a, b) => (a.pt || a.en || a.id).localeCompare(b.pt || b.en || b.id);
+const byName = (a, b) => (a.pt || a.en || a.id).localeCompare(b.pt || b.en || b.id) || a.id.localeCompare(b.id);
 const maxBy = (list, f) => list.reduce((m, it) => (f(it) > f(m) ? it : m));
 const far = maxBy(F, it => num(it.props.LightDistance));
 // a busca tag:flashlight da aba Itens compara por trecho, sem o prefixo base:, e esconde os ocultos (ve items.js)
