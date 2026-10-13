@@ -2,7 +2,7 @@
 
 > Gerado por `node tools/weapons_doc.js` a partir de `data/items.js` (extraído em 2026-09-28). Não edite à mão: rode `node build_items.js` e depois o script para atualizar.
 
-Uma **arma** é um item de script (`media/scripts`) com `ItemType = base:weapon`. Na aba Itens ela aparece com o tipo "Arma" (`type:arma` na busca). Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.Axe`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.Axe")`.
+Uma **arma** é um item de script (`media/scripts`) cujo tipo é `weapon` (`ItemType = base:weapon`, ou `Type = Weapon` nos scripts antigos). Na aba Itens, o filtro "Tipo → Arma" da barra lateral mostra exatamente essas; na busca, `type:arma` também traz as peças de arma, porque compara por trecho. Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.Axe`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.Axe")`.
 
 Total mapeado: **468 armas** de 6 origens (409 do jogo base), 422 com nome em PT-BR, 52 alteradas por outro mod (20 delas do jogo base) e 1 oculta por padrão na aba Itens.
 
@@ -10,12 +10,12 @@ Peças de arma (`ItemType = base:weaponpart`: miras, pentes, coronhas) e muniç�
 
 ## Como as armas são mapeadas
 
-`build_items.js` lê os blocos `item` de todo `media/scripts/**/*.txt`, primeiro do jogo base e depois dos mods (a pasta `42.x` mais próxima de `GAME_VER` e `common/`):
+`build_items.js` lê os blocos `item` de todo `media/scripts/**/*.txt`, primeiro do jogo base e depois dos mods (de cada mod, a maior pasta `42.x` que não passa de `GAME_VER`, mais `common/`; sem pasta de versão, `media/`):
 
 1. **Propriedades**: cada `chave = valor` do bloco vira uma string em `props`, sem conversão de tipo (`"2.0"`, `"true"`, `"TRUE"`).
 2. **Mods que redefinem um item**: se um mod declara um ID que já existe, as propriedades dele são mescladas por cima das anteriores e o nome do mod entra em `ovr`; a origem (`mod`) continua sendo quem o definiu primeiro.
 3. **Nomes**: `pt` e `en` vêm de `ItemName` em `Translate/PTBR` e `Translate/EN`, do jogo base e dos mods. Sem tradução EN, `en` cai em `DisplayName`.
-4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que existir nos packs de UI ou nos `Item_*.png` soltos.
+4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`. Sem nenhum, um item com `WorldObjectSprite` usa o sprite do tile.
 
 ## Formato de `data/items.js`
 
@@ -35,7 +35,7 @@ window.PZ_ITEMS = {
 | `id` | `<Módulo>.<Nome>`, ex.: `Base.Pistol`. |
 | `mod` | `vanilla` ou o `name=` do `mod.info` do mod que definiu o item primeiro. |
 | `ovr` | Mods que redefiniram o item depois (propriedades mescladas por cima). |
-| `type` | `ItemType` sem `base:`, em minúsculas: `weapon` para todas as armas. |
+| `type` | `ItemType` (ou `Type`, se faltar) sem `base:`, em minúsculas e só com letras: `weapon` para todas as armas. |
 | `cat` | `DisplayCategory`, a categoria mostrada no inventário (nome traduzido em `cats`). |
 | `pt`, `en` | Nomes de exibição, ou `""`. |
 | `icon` | `["p", página, ...recorte]` (pack), `["f", caminho]` (png solto), `["t", sprite]` (tile) ou `null`. |
@@ -43,7 +43,7 @@ window.PZ_ITEMS = {
 
 ## Por classe
 
-A classe não é um campo do jogo: é derivada das propriedades, nesta ordem. **Arma de fogo**: `SubCategory = Firearm` (todas têm também `Ranged` e `IsAimedFirearm`). **Explosivo**: `DisplayCategory = Explosives` (bombas, armadilhas e molotov; todos podem ser arremessados, e as variantes colocáveis disparam por temporizador, controle remoto ou sensor). As demais são **corpo a corpo**, classificadas pela perícia em `Categories` (`base:axe`, `base:longblade`...), que define qual habilidade sobe e o bônus aplicado; `base:improvised` só marca a arma como improvisada e não conta como perícia.
+A classe não é um campo do jogo: este script a deriva das propriedades, nesta ordem. **Arma de fogo**: `SubCategory = Firearm` (todas têm também `Ranged` e `IsAimedFirearm`). **Explosivo**: `DisplayCategory = Explosives` (bombas, armadilhas e molotov, todos com `SwingAnim = Throw`; a coluna "Uso" do catálogo diz quais também podem ser colocados ou acionados por temporizador, controle remoto ou sensor). As demais são **corpo a corpo**, classificadas pela categoria de perícia em `Categories` (`base:axe`, `base:longblade`...); `base:improvised` só marca a arma como improvisada e não conta como perícia.
 
 | Classe | Armas | Improvisadas |
 | --- | ---: | ---: |
@@ -108,7 +108,7 @@ A `DisplayCategory`, que é o filtro "Categoria" da aba Itens. Muitas armas corp
 
 ## Munição
 
-Os `AmmoType` das armas de fogo. "Caixa" é o `AmmoBox`, o item que o jogo usa como caixa de munição daquela arma. Na aba Itens, `ammotype=9mm` filtra as armas por munição.
+Os `AmmoType` das armas de fogo. "Caixa" lista os `AmmoBox` declarados nas armas (com ou sem módulo, como estão no script). Na aba Itens, `ammotype=9mm` filtra pelo valor de `AmmoType`; combine com o filtro "Tipo → Arma" para ver só as armas.
 
 | AmmoType | Armas | Caixa | Exemplos |
 | --- | ---: | --- | --- |
@@ -130,24 +130,6 @@ Os `AmmoType` das armas de fogo. "Caixa" é o `AmmoBox`, o item que o jogo usa c
 | `mvgi:bullets_762` | 1 | `Base.762Box` | _AK-47 Assault Rifle_ |
 
 ## Propriedades
-
-O significado das propriedades mais usadas nas armas (a lista completa vem depois):
-
-| Propriedade | Significado |
-| --- | --- |
-| `MinDamage`, `MaxDamage` | Dano por golpe ou disparo; o valor sorteado fica entre os dois. |
-| `MinRange`, `MaxRange` | Alcance em tiles. Para explosivos, `MaxRange` é a distância de arremesso. |
-| `CriticalChance`, `CritDmgMultiplier` | Chance de crítico (%) e multiplicador do dano crítico. |
-| `BaseSpeed`, `Swingtime`, `MinimumSwingtime` | Velocidade do golpe (maior `BaseSpeed` = mais rápido) e duração da animação. |
-| `MaxHitcount` | Quantos alvos um golpe ou disparo atinge. |
-| `ConditionMax`, `ConditionLowerChanceOneIn` | Durabilidade máxima e chance (1 em N) de perder condição a cada golpe. |
-| `KnockdownMod`, `PushBackMod` | Chance de derrubar e força do empurrão. |
-| `TwoHandWeapon`, `RequiresEquippedBothHands` | Se rende melhor com duas mãos / se exige as duas mãos. |
-| `DoorDamage`, `TreeDamage` | Dano em portas e árvores. |
-| `AmmoType`, `MaxAmmo`, `MagazineType` | Munição, capacidade e pente (armas de fogo). |
-| `HitChance`, `AimingPerkHitChanceModifier` | Precisão base e quanto ela cresce por nível de Pontaria. |
-| `SoundRadius`, `JamGunChance` | Raio em que o disparo atrai zumbis e chance de travar. |
-| `ExplosionPower`/`ExplosionRange`, `FireRange`, `SmokeRange`, `NoiseRange` | Efeito e raio dos explosivos. |
 
 As 173 chaves que aparecem em `props` das armas, da mais comum à mais rara. Na aba Itens, `k:Chave` filtra quem tem a chave e `chave=valor` quem tem um valor que contém o trecho. "Valores" mostra até 5 dos mais comuns (`+N` = outros N valores distintos).
 
@@ -329,11 +311,11 @@ As 173 chaves que aparecem em `props` das armas, da mais comum à mais rara. Na 
 
 ## Catálogo
 
-Todas as armas por classe, em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). Dano é `MinDamage`–`MaxDamage`, alcance é `MaxRange`, velocidade é `BaseSpeed`, peso é `Weight` e condição é `ConditionMax`. "Mãos" é `1`, `2` (`TwoHandWeapon`: perde dano se usada com uma mão) ou `exige 2` (`RequiresEquippedBothHands`).
+Todas as armas por classe, em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: dano é `MinDamage`–`MaxDamage`, alcance é `MaxRange`, crítico é `CriticalChance`, velocidade é `BaseSpeed`, peso é `Weight`, condição é `ConditionMax` e, nas armas de fogo, capacidade é `MaxAmmo`. "Mãos" é `exige 2` com `RequiresEquippedBothHands`, `2` com `TwoHandWeapon` e `1` sem nenhum dos dois. Nos explosivos, "Efeito" resume `ExplosionPower`/`ExplosionRange`, `FireRange`, `SmokeRange` e `NoiseRange`/`NoiseDuration`, e "Uso" vem de `SwingAnim = Throw`, `CanBePlaced`, `ExplosionTimer`, `CanBeRemote` e `SensorRange`.
 
 ### Arma de fogo
 
-| Nome | ID | Origem | Munição | Pente | Dano | Alcance | Crítico % | Peso | Condição |
+| Nome | ID | Origem | Munição | Capacidade | Dano | Alcance | Crítico % | Peso | Condição |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Rifle L94 | `Base.L94_Rifle` | vanilla (alterada por Firearms B42, Firearms B42 Beta, Vanilla Weapons Plus - Gunworks Edition) | `base:bullets_3030` | 6 | 1.2–2 | 30 | 25 | 3.5 | 10 |
 | _FN Fal_ | `Base.FN_FAL` | Firearms B42 (alterada por Firearms B42 Beta) | `base:bullets_308` | 20 | 1.25–3 | 30 | 20 | 3.7 | 10 |
