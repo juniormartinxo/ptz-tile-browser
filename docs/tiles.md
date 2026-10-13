@@ -8,11 +8,11 @@ Total mapeado: **131.239 tiles** em **1.547 tilesets**, 128.667 com imagem, 10.6
 
 ## Como os tiles são mapeados
 
-`build.js` cruza três fontes do jogo (e dos mods com `pack=`/`tiledef=` no `mod.info`):
+`build.js` cruza três fontes. Os mods (com `pack=`/`tiledef=` no `mod.info`) contribuem só com as duas primeiras; as traduções vêm apenas do jogo base:
 
 1. **Texture packs** (`media/texturepacks/*.pack`, formato `PZPK`): páginas PNG com a posição de cada sprite. Vanilla: `Tiles2x.pack` e `Tiles2x.floor.pack`. As páginas viram `atlas/*.png`.
 2. **Definições de tiles** (`media/*.tiles`, formato `tdef`): lista os tilesets (nome, imagem, colunas × linhas) e as propriedades de cada tile. Vanilla: `newtiledefinitions`, `tiledefinitions_erosion`, `tiledefinitions_overlays` e `tiledefinitions_b42chunkcaching`. Se o mesmo tile aparece em mais de um arquivo, as propriedades são mescladas.
-3. **Traduções** (`Translate/PTBR` e `EN/Moveables.json`): o nome exibido vem de `GroupName` + `CustomName` do tile, normalizado como chave (espaços e hífens viram `_`, apóstrofos e pontos somem).
+3. **Traduções** (`Translate/PTBR` e `EN/Moveables.json`): o nome exibido vem de `GroupName` + `CustomName` do tile, normalizado como chave (espaços e hífens viram `_`, apóstrofos e pontos somem). Só o `Moveables.json` do jogo base é lido: um tile de mod só ganha nome traduzido quando seu `GroupName` + `CustomName` coincide com uma chave do vanilla.
 
 Regras de inclusão:
 
