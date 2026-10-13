@@ -52,7 +52,7 @@ Opções de `build.js` e `build_items.js` (`build_vehicles.js` sempre inclui os 
 
 `node tools/weapons_doc.js` regera [`docs/weapons.md`](docs/weapons.md), o catálogo das armas (itens `base:weapon`: classes, origens, munição, propriedades e todas as armas), a partir de `data/items.js`. Rode-o depois de `node build_items.js`.
 
-`node tools/bags_doc.js` regera [`docs/bags.md`](docs/bags.md), o catálogo das bolsas (contêineres que vão no corpo, com slot em `CanBeEquipped`: classes, slots, origens, propriedades e todas as bolsas, mais um resumo dos outros contêineres), a partir de `data/items.js`. Rode-o depois de `node build_items.js`; ele falha se aparecer um slot que a tabela do script não conhece.
+`node tools/bags_doc.js` regera [`docs/bags.md`](docs/bags.md), o catálogo das bolsas (contêineres que vão no corpo, com slot em `CanBeEquipped`: classes, slots, origens, propriedades e todas as bolsas, mais um resumo dos outros contêineres e dos itens de outros tipos que usam um slot de bolsa), a partir de `data/items.js`. Rode-o depois de `node build_items.js`; ele falha se aparecer um slot que nenhuma classe da tabela do script reconhece ou se uma classe ficar sem bolsas.
 
 `node tools/military_vehicles_doc.js` regera [`docs/military_vehicles.md`](docs/military_vehicles.md), o catálogo dos veículos militares (lista mantida no script: classes, origens, pinturas e todos os veículos, mais os que ficam de fora e por quê), a partir de `data/vehicles.js`. Rode-o depois de `node build_vehicles.js`; ele falha se aparecer um veículo com pista de militar (pintura, arma montada, HMMWV no nome ou mod militar) que não está na lista nem nas exclusões.
 

@@ -6,7 +6,7 @@ Uma **bolsa** é um contêiner que vai no corpo: um item de script (`media/scrip
 
 Total mapeado: **222 bolsas** de 4 origens (86 do jogo base), 86 com nome em PT-BR, 0 alteradas por outro mod e 0 ocultas por padrão na aba Itens. A maior é _ALICE Medium Field Pack_ (`ALICE.AliceBackpack`), com capacidade 40.
 
-Os outros 225 contêineres (sacos, sacolas, estojos, caixas, chaveiros...) não têm `CanBeEquipped` e ficam fora do catálogo (veja [Outros contêineres](#outros-contêineres)).
+Os outros 225 contêineres (sacos, sacolas, estojos, caixas, chaveiros...) não têm `CanBeEquipped` e ficam fora do catálogo (veja [Outros contêineres](#outros-contêineres)), assim como os itens de outros tipos que usam um slot de bolsa (veja [Fora do catálogo](#fora-do-catálogo)).
 
 ## Como as bolsas são mapeadas
 
@@ -15,9 +15,9 @@ Os outros 225 contêineres (sacos, sacolas, estojos, caixas, chaveiros...) não 
 1. **Propriedades**: cada `chave = valor` do bloco vira uma string em `props`, sem conversão de tipo (`"18"`, `"0.98"`, `"base:back"`).
 2. **Mods que redefinem um item**: se um mod declara um ID que já existe, as propriedades dele são mescladas por cima das anteriores e o nome do mod entra em `ovr`; a origem (`mod`) continua sendo quem o definiu primeiro.
 3. **Nomes**: `pt` e `en` vêm de `ItemName` em `Translate/PTBR` e `Translate/EN`, do jogo base e dos mods. Sem tradução EN, `en` cai em `DisplayName`.
-4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`.
+4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`. Sem nenhum, um item com `WorldObjectSprite` usa o sprite do tile.
 
-Na aba Itens, o filtro "Tipo → Contêiner / bolsa" da barra lateral mostra todos os contêineres, inclusive os que não vão no corpo; na busca, `k:canbeequipped` deixa só as bolsas e `canbeequipped=back` filtra pelo slot (por trecho, sem diferenciar maiúsculas).
+Na aba Itens, o filtro "Tipo → Contêiner / bolsa" da barra lateral mostra todos os contêineres, inclusive os que não vão no corpo; na busca, `type:bolsa k:canbeequipped` deixa só as bolsas e `canbeequipped=satchel` filtra pelo slot. A comparação é por trecho e sem diferenciar maiúsculas: `canbeequipped=back` traz também `base:fannypackback` e `KATTAJ1:BackFanny`.
 
 ## Formato de `data/items.js`
 
@@ -41,51 +41,54 @@ window.PZ_ITEMS = {
 | `cat` | `DisplayCategory`, a categoria mostrada no inventário (nome traduzido em `cats`). |
 | `pt`, `en` | Nomes de exibição, ou `""`. |
 | `icon` | `["p", página, ...recorte]` (pack), `["f", caminho]` (png solto), `["t", sprite]` (tile) ou `null`. |
-| `props` | Todas as propriedades do bloco `item`, como strings. Nas bolsas, as principais são `CanBeEquipped` (slot), `Capacity` (capacidade), `WeightReduction` (redução do peso do conteúdo, em %), `Weight` (peso vazio) e `RunSpeedModifier` (modificador da velocidade de corrida). |
+| `props` | Todas as propriedades do bloco `item`, como strings. Nas bolsas, as principais são `CanBeEquipped` (slot), `Capacity` (capacidade), `WeightReduction` (redução de peso, em %), `Weight` (peso) e `RunSpeedModifier`. |
 
 ## Por classe
 
-A classe não é um campo do jogo: é a parte do corpo onde a bolsa vai, que este script deriva do slot em `CanBeEquipped` por uma tabela mantida no script (veja [Por slot](#por-slot)). O script falha se aparecer um slot que a tabela não conhece. A classe segue o slot, não o nome: em "Costas" há mochilas, bolsas de viagem e estojos de arma, e em "Cintura" há bolsas de peito de mod que usam o slot de pochete. `BodyLocation`, quando existe (39 bolsas), repete o slot em 38 delas; na outra, vem sem o prefixo do módulo.
+A classe não é um campo do jogo: é a família do slot em `CanBeEquipped`, que este script reconhece pela palavra no nome do slot (`fanny`, `belt`, `webbing`...), por uma tabela mantida no script (veja [Por slot](#por-slot)). O script falha se aparecer um slot que nenhuma classe reconhece ou se uma classe ficar sem bolsas. A classe segue o slot, não o nome da bolsa: em "Costas" (`base:back`) há também bolsas de viagem e estojos de arma, e em "Pochete" há 27 bolsas sem "fanny" nem "pochete" no ID nem no nome (_Military Storm Pack Large_, _Military Storm Pack Medium_, _Military Storm Pack Small_, _Military Chest Pouches Large_, _Military Chest Pouches Medium_, _Military Chest Pouches Small_). `BodyLocation`, quando existe (39 bolsas), repete o slot em 38 delas; na outra, vem sem o prefixo do módulo.
 
 | Classe | Bolsas | Capacidade | Redução % |
 | --- | ---: | ---: | ---: |
-| [Costas](#costas) | 100 | 6–40 | 50–95 |
+| [Costas](#costas) | 99 | 6–40 | 50–94 |
 | [Tiracolo](#tiracolo) | 13 | 12–13 | 65 |
-| [Cintura](#cintura) | 35 | 1–12 | 60–85 |
-| [Tronco](#tronco) | 24 | 4–15 | 80–95 |
-| [Cinto e perna](#cinto-e-perna) | 44 | 4–8 | 75–85 |
-| [Ombro e peito](#ombro-e-peito) | 6 | 1 | 85 |
+| [Pochete](#pochete) | 35 | 1–12 | 60–85 |
+| [Colete](#colete) | 24 | 4–15 | 80–95 |
+| [Cinto](#cinto) | 40 | 4–8 | 75 |
+| [Porta-máscara](#porta-máscara) | 4 | 5 | 85 |
+| [Bandoleira](#bandoleira) | 5 | 1 | 85 |
+| [Coldre](#coldre) | 1 | 1 | 85 |
+| [Tail](#tail) | 1 | 17 | 95 |
 
 ## Por slot
 
-Cada bolsa declara um slot do corpo. Os slots com prefixo de mod (`ALICE:`, `KATTAJ1:`) são criados pelo mod. "Onde" é a posição que o nome do slot indica.
+Os valores de `CanBeEquipped`, juntando os que só diferem em maiúsculas. Os slots com prefixo de mod (`ALICE:`, `KATTAJ1:`) vêm de mods.
 
-| Slot | Classe | Onde | Bolsas |
-| --- | --- | --- | ---: |
-| `base:back`, `base:Back` | Costas | costas | 99 |
-| `ALICE:Tail` | Costas | costas, embaixo (ícone `BagAliceButtpack`) | 1 |
-| `base:satchel` | Tiracolo | a tiracolo | 13 |
-| `base:fannypackfront`, `base:FannyPackFront` | Cintura | cintura, na frente | 15 |
-| `base:fannypackback` | Cintura | cintura, atrás | 3 |
-| `KATTAJ1:TacticalFannyPackFront` | Cintura | cintura, na frente | 1 |
-| `KATTAJ1:TacticalFannyPack` | Cintura | cintura, atrás | 1 |
-| `KATTAJ1:BackFanny` | Cintura | cintura, atrás | 15 |
-| `base:webbing` | Tronco | tronco | 21 |
-| `KATTAJ1:ChestRig` | Tronco | peito | 3 |
-| `KATTAJ1:BeltLeft` | Cinto e perna | cinto, à esquerda | 20 |
-| `KATTAJ1:BeltRight` | Cinto e perna | cinto, à direita | 20 |
-| `ALICE:GasMaskPouch` | Cinto e perna | ombro ou perna, pelo nome das bolsas | 4 |
-| `base:ammostrap` | Ombro e peito | peito | 5 |
-| `base:shoulderholster` | Ombro e peito | ombro | 1 |
+| Slot | Classe | Bolsas |
+| --- | --- | ---: |
+| `base:back`, `base:Back` | Costas | 99 |
+| `base:satchel` | Tiracolo | 13 |
+| `base:fannypackfront`, `base:FannyPackFront` | Pochete | 15 |
+| `KATTAJ1:BackFanny` | Pochete | 15 |
+| `base:fannypackback` | Pochete | 3 |
+| `KATTAJ1:TacticalFannyPack` | Pochete | 1 |
+| `KATTAJ1:TacticalFannyPackFront` | Pochete | 1 |
+| `base:webbing` | Colete | 21 |
+| `KATTAJ1:ChestRig` | Colete | 3 |
+| `KATTAJ1:BeltLeft` | Cinto | 20 |
+| `KATTAJ1:BeltRight` | Cinto | 20 |
+| `ALICE:GasMaskPouch` | Porta-máscara | 4 |
+| `base:ammostrap` | Bandoleira | 5 |
+| `base:shoulderholster` | Coldre | 1 |
+| `ALICE:Tail` | Tail | 1 |
 
 ## Por origem
 
-| Origem | Bolsas | Costas | Tiracolo | Cintura | Tronco | Cinto e perna | Ombro e peito |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| vanilla | 86 | 56 | 13 | 6 | 5 | 0 | 6 |
-| KATTAJ1 Military Pack | 103 | 40 | 0 | 27 | 0 | 36 | 0 |
-| ALICE Gear | 22 | 2 | 0 | 0 | 16 | 4 | 0 |
-| Cerberus Pack | 11 | 2 | 0 | 2 | 3 | 4 | 0 |
+| Origem | Bolsas | Costas | Tiracolo | Pochete | Colete | Cinto | Porta-máscara | Bandoleira | Coldre | Tail |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| vanilla | 86 | 56 | 13 | 6 | 5 | 0 | 0 | 5 | 1 | 0 |
+| KATTAJ1 Military Pack | 103 | 40 | 0 | 27 | 0 | 36 | 0 | 0 | 0 | 0 |
+| ALICE Gear | 22 | 1 | 0 | 0 | 16 | 0 | 4 | 0 | 0 | 1 |
+| Cerberus Pack | 11 | 2 | 0 | 2 | 3 | 4 | 0 | 0 | 0 | 0 |
 
 ## Por categoria
 
@@ -143,7 +146,7 @@ As 36 chaves que aparecem em `props` das bolsas, da mais comum à mais rara. Na 
 
 ## Catálogo
 
-Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: capacidade é `Capacity`, redução é `WeightReduction`, peso é `Weight`, velocidade é `RunSpeedModifier` (— quando a propriedade falta) e slot é `CanBeEquipped`. "Extras" junta `AttachmentsProvided` (lugares para pendurar itens), `AcceptItemFunction` (restringe o que entra) e `MaxItemSize`.
+Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: capacidade é `Capacity`, redução é `WeightReduction`, peso é `Weight`, velocidade é `RunSpeedModifier` (— quando a propriedade falta) e slot é `CanBeEquipped`. "Extras" junta `AttachmentsProvided` ("pendura"), `AcceptItemFunction` ("aceita") e `MaxItemSize` ("item até").
 
 ### Costas
 
@@ -220,7 +223,6 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | Bolsa de Viagem Policial | `Base.Bag_Police` | vanilla | `base:back` | 18 | 65 | 1 | 0.95 | — |
 | _Cerberus Backpack_ | `Base.Backpack_Cerberus` | Cerberus Pack | `base:back` | 17 | 90 | 1 | 0.98 | — |
 | _Cerberus Backpack_ | `Base.Backpack_Cerberus_Tight` | Cerberus Pack | `base:back` | 17 | 90 | 1 | 0.98 | — |
-| _Field Pack. Training_ | `ALICE.AliceFieldpack` | ALICE Gear | `ALICE:Tail` | 17 | 95 | 0.6 | 1 | — |
 | _Military Backpack Pocket (Black)_ | `Base.Military_Backpack_Pocket_Small-Black` | KATTAJ1 Military Pack | `base:Back` | 15 | 94 | 1 | 0.98 | — |
 | _Military Backpack Pocket (Black)_ | `Base.Military_Backpack_Pocket_Small-Black_Tight` | KATTAJ1 Military Pack | `base:Back` | 15 | 94 | 1 | 0.98 | — |
 | _Military Backpack Pocket (Desert)_ | `Base.Military_Backpack_Pocket_Small-Desert` | KATTAJ1 Military Pack | `base:Back` | 15 | 94 | 1 | 0.98 | — |
@@ -268,7 +270,7 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | Bolsa Médica a Tiracolo | `Base.Bag_Satchel_Medical` | vanilla | `base:satchel` | 12 | 65 | 1 | 0.99 | — |
 | Bolsa Militar a Tiracolo | `Base.Bag_Satchel_Military` | vanilla | `base:satchel` | 12 | 65 | 1 | 0.99 | — |
 
-### Cintura
+### Pochete
 
 | Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -308,7 +310,7 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | Pochete de Pele | `Base.Bag_FannyPackBack_Hide` | vanilla | `base:fannypackback` | 1 | 65 | 0.2 | 0.98 | — |
 | Pochete de Pele | `Base.Bag_FannyPackFront_Hide` | vanilla | `base:fannypackfront` | 1 | 65 | 0.2 | 0.98 | — |
 
-### Tronco
+### Colete
 
 | Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -337,7 +339,7 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | _Cerberus Chest Rig_ | `Base.ChestRigs_Cerberus_NoBelts` | Cerberus Pack | `KATTAJ1:ChestRig` | 4 | 80 | 0.5 | 0.98 | — |
 | _Cerberus Chest Rig_ | `Base.ChestRigs_Cerberus_Tight` | Cerberus Pack | `KATTAJ1:ChestRig` | 4 | 80 | 0.5 | 0.98 | — |
 
-### Cinto e perna
+### Cinto
 
 | Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -361,10 +363,6 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | _Military Utility Hip Pouch (White)_ | `Base.Military_BagLeg_Utility_Medium-White_ArmorRight` | KATTAJ1 Military Pack | `KATTAJ1:BeltRight` | 8 | 75 | 0.5 | — | — |
 | _Military Utility Hip Pouch (White)_ | `Base.Military_BagLeg_Utility_Medium-White_Left` | KATTAJ1 Military Pack | `KATTAJ1:BeltLeft` | 8 | 75 | 0.5 | — | — |
 | _Military Utility Hip Pouch (White)_ | `Base.Military_BagLeg_Utility_Medium-White_Right` | KATTAJ1 Military Pack | `KATTAJ1:BeltRight` | 8 | 75 | 0.5 | — | — |
-| _M40 Gas Mask Carrier (Leg)_ | `ALICE.GasMaskPouchThigh` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
-| _M40 Gas Mask Carrier (Leg)_ | `ALICE.GasMaskPouchThighLoosen` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
-| _M40 Gas Mask Carrier (Over Shoulder)_ | `ALICE.GasMaskPouchOverShoulder` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
-| _M40 Gas Mask Carrier (Over Shoulder)_ | `ALICE.GasMaskPouchOverShoulderLoosen` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
 | _Cerberus Hip Bag (Left)_ | `Base.HipBag_Cerberus_ArmorLeft` | Cerberus Pack | `KATTAJ1:BeltLeft` | 4 | 75 | 0.3 | 0.98 | — |
 | _Cerberus Hip Bag (Left)_ | `Base.HipBag_Cerberus_Left` | Cerberus Pack | `KATTAJ1:BeltLeft` | 4 | 75 | 0.3 | 0.98 | — |
 | _Cerberus Hip Bag (Right)_ | `Base.HipBag_Cerberus_ArmorRight` | Cerberus Pack | `KATTAJ1:BeltRight` | 4 | 75 | 0.3 | 0.98 | — |
@@ -386,7 +384,16 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | _Military MagSecure Hip Pouch (White)_ | `Base.Military_BagLeg_MagSecure_Small-White_Left` | KATTAJ1 Military Pack | `KATTAJ1:BeltLeft` | 4 | 75 | 0.5 | — | — |
 | _Military MagSecure Hip Pouch (White)_ | `Base.Military_BagLeg_MagSecure_Small-White_Right` | KATTAJ1 Military Pack | `KATTAJ1:BeltRight` | 4 | 75 | 0.5 | — | — |
 
-### Ombro e peito
+### Porta-máscara
+
+| Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| _M40 Gas Mask Carrier (Leg)_ | `ALICE.GasMaskPouchThigh` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
+| _M40 Gas Mask Carrier (Leg)_ | `ALICE.GasMaskPouchThighLoosen` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
+| _M40 Gas Mask Carrier (Over Shoulder)_ | `ALICE.GasMaskPouchOverShoulder` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
+| _M40 Gas Mask Carrier (Over Shoulder)_ | `ALICE.GasMaskPouchOverShoulderLoosen` | ALICE Gear | `ALICE:GasMaskPouch` | 5 | 85 | 0.6 | 1 | — |
+
+### Bandoleira
 
 | Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -395,7 +402,18 @@ Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem a
 | Bandoleira de Balas | `Base.AmmoStrap_Bullets_308` | vanilla | `base:ammostrap` | 1 | 85 | — | 0.98 | aceita: `AcceptItemFunction.AmmoStrap_Bullets` |
 | Bandoleira de Cartuchos | `Base.AmmoStrap_Brown_Shells` | vanilla | `base:ammostrap` | 1 | 85 | — | 0.98 | aceita: `AcceptItemFunction.AmmoStrap_Shells` |
 | Bandoleira de Cartuchos | `Base.AmmoStrap_Shells` | vanilla | `base:ammostrap` | 1 | 85 | — | 0.98 | aceita: `AcceptItemFunction.AmmoStrap_Shells` |
+
+### Coldre
+
+| Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
 | Coldre - Ombro | `Base.HolsterShoulder` | vanilla | `base:shoulderholster` | 1 | 85 | 0.4 | 0.99 | pendura: `HolsterShoulder`; aceita: `AcceptItemFunction.HolsterShoulder` |
+
+### Tail
+
+| Nome | ID | Origem | Slot | Capacidade | Redução % | Peso | Velocidade | Extras |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| _Field Pack. Training_ | `ALICE.AliceFieldpack` | ALICE Gear | `ALICE:Tail` | 17 | 95 | 0.6 | 1 | — |
 
 ## Outros contêineres
 
@@ -414,3 +432,12 @@ Os 225 contêineres sem `CanBeEquipped`, por `DisplayCategory`, com até 8 nomes
 | `Bunny` | Coelhinho | 1 | Chaveiro - Pé de Coelho |
 | `Duck` | Pato | 1 | Chaveiro - Pato de Borracha |
 | `Fox` | Raposa | 1 | Chaveiro - Raposa Azul |
+
+## Fora do catálogo
+
+Itens de outros tipos (não `container`) cujo `CanBeEquipped` ou `BodyLocation` é um dos slots das bolsas. Usam o mesmo slot, mas não são contêineres. "Exemplos" mostra os nomes distintos (PT-BR ou, sem tradução, inglês), sem a variação entre parênteses no fim, como a cor.
+
+| Tipo | Itens | Slots | Exemplos |
+| --- | ---: | --- | --- |
+| `clothing` | 48 | `base:satchel`, `base:back`, `KATTAJ1:BeltLeft`, `KATTAJ1:BeltRight`, `KATTAJ1:BackFanny` | Cantil de Couro; Cantil do Velho Oeste; Pulverizador Costal; Military Holster Defender; Military Sheath Defender |
+| `radio` | 1 | `base:back` | Rádio Mochila de Comunicações do Exército dos Estados Unidos |

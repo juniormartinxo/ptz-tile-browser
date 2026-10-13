@@ -23,35 +23,30 @@ if (!internalSrc) throw new Error('nao achei INTERNAL_CATS no items.js');
 const INTERNAL_CATS = new Set(new Function('return ' + internalSrc)());
 const hidden = it => INTERNAL_CATS.has(it.cat) || yes(it.props.OBSOLETE);
 
-// ---------- classe: pelo slot (CanBeEquipped), sem diferenciar maiusculas ----------
-// O jogo nao agrupa os slots: a tabela e mantida aqui. Um slot novo nos dados faz o script falhar, para ela nao ficar para tras.
-const BACK = 'Costas', SATCHEL = 'Tiracolo', FANNY = 'Cintura', VEST = 'Tronco', BELT = 'Cinto e perna', STRAP = 'Ombro e peito';
-const CLASSES = [BACK, SATCHEL, FANNY, VEST, BELT, STRAP];
-const SLOTS = [
-  ['base:back', BACK, 'costas'],
-  ['ALICE:Tail', BACK, 'costas, embaixo (ícone `BagAliceButtpack`)'],
-  ['base:satchel', SATCHEL, 'a tiracolo'],
-  ['base:fannypackfront', FANNY, 'cintura, na frente'],
-  ['base:fannypackback', FANNY, 'cintura, atrás'],
-  ['KATTAJ1:TacticalFannyPackFront', FANNY, 'cintura, na frente'],
-  ['KATTAJ1:TacticalFannyPack', FANNY, 'cintura, atrás'],
-  ['KATTAJ1:BackFanny', FANNY, 'cintura, atrás'],
-  ['base:webbing', VEST, 'tronco'],
-  ['KATTAJ1:ChestRig', VEST, 'peito'],
-  ['KATTAJ1:BeltLeft', BELT, 'cinto, à esquerda'],
-  ['KATTAJ1:BeltRight', BELT, 'cinto, à direita'],
-  ['ALICE:GasMaskPouch', BELT, 'ombro ou perna, pelo nome das bolsas'],
-  ['base:ammostrap', STRAP, 'peito'],
-  ['base:shoulderholster', STRAP, 'ombro'],
+// ---------- classe: a familia do slot (CanBeEquipped), pela palavra no nome do slot ----------
+// O jogo nao agrupa os slots: a tabela e mantida aqui. Um slot que nenhuma classe reconhece, ou uma classe sem bolsas,
+// faz o script falhar, para a tabela nao ficar para tras quando os dados mudarem.
+const CLASS_SLOTS = [
+  ['Costas', /^base:back$/i],
+  ['Tiracolo', /satchel/i],
+  ['Pochete', /fanny/i],
+  ['Colete', /webbing|chestrig/i],
+  ['Cinto', /belt/i],
+  ['Porta-máscara', /gasmask/i],
+  ['Bandoleira', /ammostrap/i],
+  ['Coldre', /holster/i],
+  ['Tail', /^alice:tail$/i],
 ];
+const CLASSES = CLASS_SLOTS.map(c => c[0]);
+const slotClass = s => (CLASS_SLOTS.find(([, re]) => re.test(s)) || [])[0];
+const classOf = it => slotClass(it.props.CanBeEquipped);
+const unknown = [...new Set(B.filter(it => !classOf(it)).map(it => it.props.CanBeEquipped))];
+if (unknown.length) throw new Error('slots de bolsa que nenhuma classe de CLASS_SLOTS reconhece: ' + unknown.join(', '));
+const unused = CLASSES.filter(c => !B.some(it => classOf(it) === c));
+if (unused.length) throw new Error('classes de CLASS_SLOTS sem nenhuma bolsa em data/items.js: ' + unused.join(', '));
 const slotKey = s => s.toLowerCase();
-const SLOT = new Map(SLOTS.map(s => [slotKey(s[0]), s]));
-const slotOf = it => SLOT.get(slotKey(it.props.CanBeEquipped));
-const unknown = [...new Set(B.filter(it => !slotOf(it)).map(it => it.props.CanBeEquipped))];
-if (unknown.length) throw new Error('slots de bolsa fora de SLOTS: ' + unknown.join(', '));
-const unused = SLOTS.filter(s => !B.some(it => slotOf(it) === s)).map(s => s[0]);
-if (unused.length) throw new Error('slots em SLOTS sem nenhuma bolsa em data/items.js: ' + unused.join(', '));
-const classOf = it => slotOf(it)[1];
+const FANNY = 'Pochete', notFanny = it => classOf(it) === FANNY && !/fanny|pochete/i.test(it.id + ' ' + it.en + ' ' + it.pt);
+const baseName = it => (it.pt || it.en || it.id).replace(/\s*\([^)]*\)\s*$/, '');
 
 // ---------- contagens ----------
 const byClass = {}, bySlot = {}, bySrc = {}, byCat = {}, propCnt = {}, propVals = {}, otherCat = {};
@@ -67,11 +62,20 @@ for (const it of B) {
   }
 }
 for (const it of OTHER) { const o = otherCat[it.cat] || (otherCat[it.cat] = { n: 0, names: new Set() }); o.n++; o.names.add(name(it)); }
+// itens de outro tipo que declaram um slot de bolsa (em CanBeEquipped ou BodyLocation): ficam fora, mas o doc diz quais
+const bagSlots = new Set(B.map(it => slotKey(it.props.CanBeEquipped)));
+const itemSlot = it => [it.props.CanBeEquipped, it.props.BodyLocation].find(s => s && bagSlots.has(slotKey(s)));
+const outside = {};
+for (const it of D.items) {
+  if (it.type === 'container' || !itemSlot(it)) continue;
+  const o = outside[it.type] || (outside[it.type] = { n: 0, names: new Set(), slots: new Set() }); o.n++; o.names.add(baseName(it)); o.slots.add(itemSlot(it));
+}
 const srcOrder = Object.keys(bySrc).sort((a, b) => (a === 'vanilla' ? -1 : b === 'vanilla' ? 1 : bySrc[b].n - bySrc[a].n || a.localeCompare(b)));
 const withPt = B.filter(it => it.pt).length, nHidden = B.filter(hidden).length;
 const nOvr = B.filter(it => it.ovr.length).length;
-const nBodyDiff = B.filter(it => it.props.BodyLocation && it.props.BodyLocation !== it.props.CanBeEquipped).length;
-const nBody = B.filter(it => it.props.BodyLocation).length;
+const withBody = B.filter(it => it.props.BodyLocation), nBody = withBody.length;
+const bodyDiff = withBody.filter(it => it.props.BodyLocation !== it.props.CanBeEquipped);
+const bodyNoPrefix = bodyDiff.length > 0 && bodyDiff.every(it => it.props.CanBeEquipped.endsWith(':' + it.props.BodyLocation));
 const byName = (a, b) => (a.pt || a.en || a.id).localeCompare(b.pt || b.en || b.id) || a.id.localeCompare(b.id);
 const all = (list, f) => list.length > 0 && list.every(f);
 const maxBy = (list, f) => list.reduce((m, it) => (f(it) > f(m) ? it : m));
@@ -79,7 +83,7 @@ const maxBy = (list, f) => list.reduce((m, it) => (f(it) > f(m) ? it : m));
 // ---------- markdown ----------
 const out = [];
 const p = (...l) => out.push(...l);
-const RIGHT = /^(Bolsas|Contêineres|Capacidade|Redução %|Peso|Velocidade)$/;
+const RIGHT = /^(Bolsas|Contêineres|Itens|Capacidade|Redução %|Peso|Velocidade)$/;
 const table = (head, rows) => { p('| ' + head.join(' | ') + ' |', '| ' + head.map(h => RIGHT.test(h) || CLASSES.includes(h) ? '---:' : '---').join(' | ') + ' |'); rows.forEach(r => p('| ' + r.map(cell).join(' | ') + ' |')); p(''); };
 // ancora do GitHub: mantem letras acentuadas, nao as troca pela letra sem acento
 const anchor = s => s.toLowerCase().replace(/[^\p{L}\p{N}_ -]/gu, '').replace(/ /g, '-');
@@ -91,14 +95,14 @@ p('# Bolsas', '',
   '> Gerado por `node tools/bags_doc.js` a partir de `data/items.js` (extraído em ' + D.generated.slice(0, 10) + '). Não edite à mão: rode `node build_items.js` e depois o script para atualizar.', '',
   'Uma **bolsa** é um contêiner que vai no corpo: um item de script (`media/scripts`) cujo tipo é `container` (`ItemType = base:container`) e que declara um slot em `CanBeEquipped` (`base:back`, `base:satchel`...). São mochilas, bolsas de viagem, bolsas a tiracolo, pochetes, coletes, bolsas de cinto, bandoleiras e coldres. Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.Bag_Schoolbag`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.Bag_Schoolbag")`.', '',
   `Total mapeado: **${fmt(B.length)} bolsas** de ${fmt(srcOrder.length)} origens (${fmt(bySrc.vanilla ? bySrc.vanilla.n : 0)} do jogo base), ${fmt(withPt)} com nome em PT-BR, ${fmt(nOvr)} ${nOvr === 1 ? 'alterada' : 'alteradas'} por outro mod e ${fmt(nHidden)} ${nHidden === 1 ? 'oculta' : 'ocultas'} por padrão na aba Itens. A maior é ${name(big)} (\`${big.id}\`), com capacidade ${num(big.props.Capacity)}.`, '',
-  `Os outros ${fmt(OTHER.length)} contêineres (sacos, sacolas, estojos, caixas, chaveiros...) não têm \`CanBeEquipped\` e ficam fora do catálogo (veja [Outros contêineres](#outros-contêineres)).`, '',
+  `Os outros ${fmt(OTHER.length)} contêineres (sacos, sacolas, estojos, caixas, chaveiros...) não têm \`CanBeEquipped\` e ficam fora do catálogo (veja [Outros contêineres](#outros-contêineres)), assim como os itens de outros tipos que usam um slot de bolsa (veja [Fora do catálogo](#fora-do-catálogo)).`, '',
   '## Como as bolsas são mapeadas', '',
   '`build_items.js` lê os blocos `item` de todo `media/scripts/**/*.txt`, primeiro do jogo base e depois dos mods (de cada mod, a maior pasta `42.x` que não passa de `GAME_VER`, mais `common/`; sem pasta de versão, `media/`):', '',
   '1. **Propriedades**: cada `chave = valor` do bloco vira uma string em `props`, sem conversão de tipo (`"18"`, `"0.98"`, `"base:back"`).',
   '2. **Mods que redefinem um item**: se um mod declara um ID que já existe, as propriedades dele são mescladas por cima das anteriores e o nome do mod entra em `ovr`; a origem (`mod`) continua sendo quem o definiu primeiro.',
   '3. **Nomes**: `pt` e `en` vêm de `ItemName` em `Translate/PTBR` e `Translate/EN`, do jogo base e dos mods. Sem tradução EN, `en` cai em `DisplayName`.',
-  '4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`.', '',
-  'Na aba Itens, o filtro "Tipo → Contêiner / bolsa" da barra lateral mostra todos os contêineres, inclusive os que não vão no corpo; na busca, `k:canbeequipped` deixa só as bolsas e `canbeequipped=back` filtra pelo slot (por trecho, sem diferenciar maiúsculas).', '',
+  '4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`. Sem nenhum, um item com `WorldObjectSprite` usa o sprite do tile.', '',
+  'Na aba Itens, o filtro "Tipo → Contêiner / bolsa" da barra lateral mostra todos os contêineres, inclusive os que não vão no corpo; na busca, `type:bolsa k:canbeequipped` deixa só as bolsas e `canbeequipped=satchel` filtra pelo slot. A comparação é por trecho e sem diferenciar maiúsculas: `canbeequipped=back` traz também `base:fannypackback` e `KATTAJ1:BackFanny`.', '',
   '## Formato de `data/items.js`', '',
   'As bolsas ficam junto com os demais itens:', '',
   '```js',
@@ -117,17 +121,21 @@ table(['Campo', 'Descrição'], [
   ['`cat`', '`DisplayCategory`, a categoria mostrada no inventário (nome traduzido em `cats`).'],
   ['`pt`, `en`', 'Nomes de exibição, ou `""`.'],
   ['`icon`', '`["p", página, ...recorte]` (pack), `["f", caminho]` (png solto), `["t", sprite]` (tile) ou `null`.'],
-  ['`props`', 'Todas as propriedades do bloco `item`, como strings. Nas bolsas, as principais são `CanBeEquipped` (slot), `Capacity` (capacidade), `WeightReduction` (redução do peso do conteúdo, em %), `Weight` (peso vazio) e `RunSpeedModifier` (modificador da velocidade de corrida).'],
+  ['`props`', 'Todas as propriedades do bloco `item`, como strings. Nas bolsas, as principais são `CanBeEquipped` (slot), `Capacity` (capacidade), `WeightReduction` (redução de peso, em %), `Weight` (peso) e `RunSpeedModifier`.'],
 ]);
 
+const backKinds = [[/duffel/i, 'bolsas de viagem'], [/case/i, 'estojos de arma']].filter(([re]) => B.some(it => classOf(it) === 'Costas' && re.test(it.id))).map(k => k[1]);
+const odd = [...new Set(B.filter(notFanny).map(baseName))];
 p('## Por classe', '',
-  'A classe não é um campo do jogo: é a parte do corpo onde a bolsa vai, que este script deriva do slot em `CanBeEquipped` por uma tabela mantida no script (veja [Por slot](#por-slot)). O script falha se aparecer um slot que a tabela não conhece. A classe segue o slot, não o nome: em "Costas" há mochilas, bolsas de viagem e estojos de arma, e em "Cintura" há bolsas de peito de mod que usam o slot de pochete. ' +
-  `\`BodyLocation\`, quando existe (${fmt(nBody)} bolsas), repete o slot` + (nBodyDiff ? ` em ${fmt(nBody - nBodyDiff)} delas; ${nBodyDiff === 1 ? 'na outra, vem' : `nas outras ${fmt(nBodyDiff)}, vem`} sem o prefixo do módulo` : '') + '.', '');
+  'A classe não é um campo do jogo: é a família do slot em `CanBeEquipped`, que este script reconhece pela palavra no nome do slot (`fanny`, `belt`, `webbing`...), por uma tabela mantida no script (veja [Por slot](#por-slot)). O script falha se aparecer um slot que nenhuma classe reconhece ou se uma classe ficar sem bolsas. A classe segue o slot, não o nome da bolsa' +
+  (backKinds.length ? ': em "Costas" (`base:back`) há também ' + backKinds.join(' e ') : '') +
+  (odd.length ? `${backKinds.length ? ', e' : ':'} em "${FANNY}" há ${fmt(B.filter(notFanny).length)} bolsas sem "fanny" nem "pochete" no ID nem no nome (${odd.map(n => '_' + n + '_').join(', ')})` : '') + '. ' +
+  `\`BodyLocation\`, quando existe (${fmt(nBody)} bolsas), repete o slot` + (bodyDiff.length ? ` em ${fmt(nBody - bodyDiff.length)} delas; ${bodyDiff.length === 1 ? 'na outra, vem' : `nas outras ${fmt(bodyDiff.length)}, vem`} ${bodyNoPrefix ? 'sem o prefixo do módulo' : 'diferente'}` : '') + '.', '');
 const stat = (list, k) => { const v = list.map(it => num(it.props[k])); return Math.min(...v) === Math.max(...v) ? String(Math.min(...v)) : Math.min(...v) + '–' + Math.max(...v); };
 table(['Classe', 'Bolsas', 'Capacidade', 'Redução %'], CLASSES.filter(c => byClass[c]).map(c => ['[' + c + '](#' + anchor(c) + ')', fmt(byClass[c].length), stat(byClass[c], 'Capacity'), stat(byClass[c], 'WeightReduction')]));
 
-p('## Por slot', '', 'Cada bolsa declara um slot do corpo. Os slots com prefixo de mod (`ALICE:`, `KATTAJ1:`) são criados pelo mod. "Onde" é a posição que o nome do slot indica.', '');
-table(['Slot', 'Classe', 'Onde', 'Bolsas'], SLOTS.map(([s, c, where]) => { const o = bySlot[slotKey(s)]; return [[...o.raw].map(r => '`' + r + '`').join(', '), c, where, fmt(o.n)]; }));
+p('## Por slot', '', 'Os valores de `CanBeEquipped`, juntando os que só diferem em maiúsculas. Os slots com prefixo de mod (`ALICE:`, `KATTAJ1:`) vêm de mods.', '');
+table(['Slot', 'Classe', 'Bolsas'], Object.values(bySlot).map(o => ({ ...o, c: slotClass([...o.raw][0]) })).sort((a, b) => CLASSES.indexOf(a.c) - CLASSES.indexOf(b.c) || b.n - a.n).map(o => [[...o.raw].map(r => '`' + r + '`').join(', '), o.c, fmt(o.n)]));
 
 p('## Por origem', '');
 table(['Origem', 'Bolsas', ...CLASSES], srcOrder.map(s => [s, fmt(bySrc[s].n), ...CLASSES.map(c => fmt(bySrc[s].cls[c] || 0))]));
@@ -144,7 +152,7 @@ table(['Propriedade', 'Bolsas', 'Valores'], Object.entries(propCnt).sort((a, b) 
 }));
 
 p('## Catálogo', '',
-  'Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: capacidade é `Capacity`, redução é `WeightReduction`, peso é `Weight`, velocidade é `RunSpeedModifier` (— quando a propriedade falta) e slot é `CanBeEquipped`. "Extras" junta `AttachmentsProvided` (lugares para pendurar itens), `AcceptItemFunction` (restringe o que entra) e `MaxItemSize`.', '');
+  'Todas as bolsas por classe, da maior capacidade para a menor e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: capacidade é `Capacity`, redução é `WeightReduction`, peso é `Weight`, velocidade é `RunSpeedModifier` (— quando a propriedade falta) e slot é `CanBeEquipped`. "Extras" junta `AttachmentsProvided` ("pendura"), `AcceptItemFunction` ("aceita") e `MaxItemSize` ("item até").', '');
 const extras = it => [it.props.AttachmentsProvided && 'pendura: ' + it.props.AttachmentsProvided.split(';').map(s => '`' + s.trim() + '`').join(', '),
   it.props.AcceptItemFunction && 'aceita: `' + it.props.AcceptItemFunction + '`', it.props.MaxItemSize && 'item até ' + num(it.props.MaxItemSize)].filter(Boolean).join('; ') || '—';
 for (const c of CLASSES) {
@@ -158,6 +166,10 @@ for (const c of CLASSES) {
 p('## Outros contêineres', '', `Os ${fmt(OTHER.length)} contêineres sem \`CanBeEquipped\`, por \`DisplayCategory\`, com até 8 nomes distintos de cada. Ficam fora do catálogo.`, '');
 table(['Categoria', 'Nome', 'Contêineres', 'Exemplos'], Object.entries(otherCat).sort((a, b) => b[1].n - a[1].n || a[0].localeCompare(b[0])).map(([c, o]) => [
   c ? '`' + c + '`' : '(vazia)', catLabel(c), fmt(o.n), [...o.names].slice(0, 8).join('; ') + (o.names.size > 8 ? '...' : '')]));
+
+p('## Fora do catálogo', '', 'Itens de outros tipos (não `container`) cujo `CanBeEquipped` ou `BodyLocation` é um dos slots das bolsas. Usam o mesmo slot, mas não são contêineres. "Exemplos" mostra os nomes distintos (PT-BR ou, sem tradução, inglês), sem a variação entre parênteses no fim, como a cor.', '');
+table(['Tipo', 'Itens', 'Slots', 'Exemplos'], Object.entries(outside).sort((a, b) => b[1].n - a[1].n || a[0].localeCompare(b[0])).map(([t, o]) => [
+  '`' + t + '`', fmt(o.n), [...o.slots].map(s => '`' + s + '`').join(', '), [...o.names].join('; ')]));
 
 const file = path.join(ROOT, 'docs/bags.md');
 fs.writeFileSync(file, out.join('\n'));
