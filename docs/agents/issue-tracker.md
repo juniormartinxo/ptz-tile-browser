@@ -27,6 +27,8 @@ Get the ids from `get_project("PTZ")`. Never guess them. These were the values w
 
 Move the issue to a `started` column before you begin. Move it to `completed` (or `canceled`) when you finish. Add a comment only if part of the work was not done. Propose a one-line commit message in chat, `PTZ-42 short summary`, and don't commit it yourself.
 
+When you open a PR for an issue, put `Closes PTZ-42` on the first line of the PR body. The It's a Plan webhook uses it to link and close the issue.
+
 ## When a skill says "publish to the issue tracker"
 
 Create an It's a Plan issue in project PTZ.
