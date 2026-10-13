@@ -50,6 +50,8 @@ Opções de `build.js` e `build_items.js` (`build_vehicles.js` sempre inclui os 
 
 `node tools/tiles_doc.js` regera [`docs/tiles.md`](docs/tiles.md), o catálogo dos tiles mapeados (formato de `data/tiles.js`, contagens e todos os tilesets), a partir de `data/tiles.js`. Rode-o depois de `node build.js`.
 
+`node tools/weapons_doc.js` regera [`docs/weapons.md`](docs/weapons.md), o catálogo das armas (itens `base:weapon`: classes, origens, munição, propriedades e todas as armas), a partir de `data/items.js`. Rode-o depois de `node build_items.js`.
+
 ## Mapa
 
 A aba Mapa abre `map/html/pzmap.html`, gerado pelo pzmap2dzi (cerca de 45 GB, fora do Git). Para gerá-lo:
@@ -72,8 +74,9 @@ data/              dados gerados (tiles, itens, veículos, modelos e texturas 3D
 icons/, vehicles/  ícones de itens e skins de veículos
 atlas/             páginas de textura dos tiles (gerado, ignorado pelo Git)
 map/               mapa renderizado (gerado, ignorado pelo Git)
-tools/             utilitários do mapa e gerador de docs/tiles.md
+tools/             utilitários do mapa e geradores de docs/tiles.md e docs/weapons.md
 docs/tiles.md      catálogo dos tiles (gerado)
+docs/weapons.md    catálogo das armas (gerado)
 AGENTS.md, docs/agents/  instruções para agentes de IA (issues no It's a Plan, projeto PTZ)
 .claude/, .agents/, skills-lock.json  skills dos agentes
 ```
