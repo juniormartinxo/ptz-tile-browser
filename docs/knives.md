@@ -208,7 +208,7 @@ Todas as facas por classe; nas que são armas, do maior dano para o menor, e dep
 
 ## Fora do catálogo
 
-Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:smallblade` em `Categories`) ou que têm "knife", "faca", "canivete", "dagger", "adaga", "cleaver" ou "cutelo" no ID ou no nome: 63 itens, 29 deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. Uma receita pode aceitar alguns deles no mesmo slot da faca (ex.: `tags[base:sharpknife;base:scissors]`), mas eles não têm as tags de faca.
+Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:smallblade` em `Categories`) ou que têm "knife", "faca", "canivete", "dagger", "adaga", "cleaver" ou "cutelo" no ID ou no nome (roupas não entram pelo nome): 45 itens, 29 deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. Uma receita pode aceitar alguns deles no mesmo slot da faca (ex.: `tags[base:sharpknife;base:scissors]`), mas eles não têm as tags de faca.
 
 | Nome | ID | Origem | Tipo | Categoria | Por quê |
 | --- | --- | --- | --- | --- | --- |
@@ -241,9 +241,6 @@ Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:sm
 | Punhal de Vidro | `Base.GlassShiv` | vanilla | `weapon` | Arma - Artesanal | lâmina curta |
 | Tesoura | `Base.Scissors` | vanilla | `weapon` | Objeto Doméstico / Arma | lâmina curta |
 | Tesoura Rudimentar | `Base.ScissorsForged` | vanilla | `weapon` | Objeto Doméstico / Arma | lâmina curta |
-| Bainha de Faca Lendária (Costas) | `LTW.LegendaryKnifeSheathBack` | Legendary Tactical Weapons | `clothing` | Acessório | nome |
-| Bainha de Faca Lendária (Coxa direita) | `LTW.LegendaryKnifeSheathRightThigh` | Legendary Tactical Weapons | `clothing` | Acessório | nome |
-| Chapéu de Brincadeira - Faca | `Base.Hat_JokeKnife` | vanilla | `clothing` | Lembrança | nome |
 | Cutelo de Carne | `Base.MeatCleaver` | vanilla | `weapon` | Culinária / Arma | nome |
 | Cutelo de Carne | `Base.MeatCleaverForged` | vanilla | `weapon` | Culinária / Arma | nome |
 | Cutelo de Sucata Metálica | `Base.MeatCleaver_Scrap` | vanilla | `weapon` | Arma - Artesanal | nome |
@@ -260,18 +257,3 @@ Itens sem `sharpknife` nem `dullknife` que são armas de lâmina curta (`base:sm
 | Lança com Faca de Sucata Metálica | `Base.SpearScrapKnife` | vanilla | `weapon` | Arma - Artesanal | nome |
 | Lança com Faca Grande | `Base.SpearLargeKnife` | vanilla | `weapon` | Arma - Artesanal | nome |
 | Lança com Faca Pequena | `Base.SpearKnifeSmall` | vanilla | `weapon` | Arma - Artesanal | nome |
-| _Military Knife Pleated Mini Skirt (Black)_ | `Base.Military_Skirt_KnifePleatedMini-Black` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Mini Skirt (Desert)_ | `Base.Military_Skirt_KnifePleatedMini-Desert` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Mini Skirt (Green)_ | `Base.Military_Skirt_KnifePleatedMini-Green` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Mini Skirt (White)_ | `Base.Military_Skirt_KnifePleatedMini-White` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Short Skirt (Black)_ | `Base.Military_Skirt_KnifePleatedShort-Black` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Short Skirt (Desert)_ | `Base.Military_Skirt_KnifePleatedShort-Desert` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Short Skirt (Green)_ | `Base.Military_Skirt_KnifePleatedShort-Green` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Short Skirt (White)_ | `Base.Military_Skirt_KnifePleatedShort-White` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Skirt (Black)_ | `Base.Military_Skirt_KnifePleated-Black` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Skirt (Desert)_ | `Base.Military_Skirt_KnifePleated-Desert` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Skirt (Green)_ | `Base.Military_Skirt_KnifePleated-Green` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Military Knife Pleated Skirt (White)_ | `Base.Military_Skirt_KnifePleated-White` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Press Knife Pleated Mini Skirt_ | `Base.Military_Skirt_KnifePleatedMini-Press` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Press Knife Pleated Short Skirt_ | `Base.Military_Skirt_KnifePleatedShort-Press` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |
-| _Press Knife Pleated Skirt_ | `Base.Military_Skirt_KnifePleated-Press` | KATTAJ1 Military Pack | `clothing` | Vestuário | nome |

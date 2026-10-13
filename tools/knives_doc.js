@@ -75,10 +75,11 @@ const strongest = maxBy(weapons, it => num(it.props.MaxDamage));
 const tagSearch = D.items.filter(it => !hidden(it) && tags(it).some(t => t.replace(/^base:/i, '').toLowerCase().includes('knife')));
 const tagSearchExtra = tagSearch.filter(it => !isKnife(it));
 const tagSearchMissing = K.filter(it => !hidden(it) && !tagSearch.includes(it));
-// fora do catalogo: armas de lamina curta sem as tags e itens com knife/faca/canivete/dagger/adaga no ID ou no nome
+// fora do catalogo: armas de lamina curta sem as tags e itens com uma das NAME_WORDS no ID ou no nome; roupas nao entram
+// pelo nome (as saias "Knife Pleated" sao um tipo de prega, nao facas)
 const NAME_WORDS = ['knife', 'faca', 'canivete', 'dagger', 'adaga', 'cleaver', 'cutelo'];
 const NAME_RE = new RegExp(NAME_WORDS.join('|'), 'i');
-const WHY = [['lâmina curta', it => weaponOf(it, 'smallblade')], ['nome', it => NAME_RE.test([it.id, it.en, it.pt].join(' '))]];
+const WHY = [['lâmina curta', it => weaponOf(it, 'smallblade')], ['nome', it => it.type !== 'clothing' && NAME_RE.test([it.id, it.en, it.pt].join(' '))]];
 const why = it => WHY.filter(([, f]) => f(it)).map(w => w[0]);
 const outside = D.items.filter(it => !isKnife(it) && why(it).length);
 const outsideBlade = outside.filter(it => weaponOf(it, 'smallblade'));
@@ -173,7 +174,7 @@ for (const c of CLASSES) {
 }
 
 p('## Fora do catálogo', '',
-  `Itens sem \`sharpknife\` nem \`dullknife\` que são armas de lâmina curta (\`base:smallblade\` em \`Categories\`) ou que têm ${or(NAME_WORDS.map(w => '"' + w + '"'))} no ID ou no nome: ${fmt(outside.length)} itens, ${fmt(outsideBlade.length)} deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. Uma receita pode aceitar alguns deles no mesmo slot da faca (ex.: \`tags[base:sharpknife;base:scissors]\`), mas eles não têm as tags de faca.`, '');
+  `Itens sem \`sharpknife\` nem \`dullknife\` que são armas de lâmina curta (\`base:smallblade\` em \`Categories\`) ou que têm ${or(NAME_WORDS.map(w => '"' + w + '"'))} no ID ou no nome (roupas não entram pelo nome): ${fmt(outside.length)} itens, ${fmt(outsideBlade.length)} deles armas de lâmina curta. "Por quê" diz qual dos dois critérios o item cumpre. Uma receita pode aceitar alguns deles no mesmo slot da faca (ex.: \`tags[base:sharpknife;base:scissors]\`), mas eles não têm as tags de faca.`, '');
 table(['Nome', 'ID', 'Origem', 'Tipo', 'Categoria', 'Por quê'], outside.sort((a, b) => weaponOf(b, 'smallblade') - weaponOf(a, 'smallblade') || byName(a, b)).map(it => [
   label(it), '`' + it.id + '`', origin(it), '`' + it.type + '`', catLabel(it.cat), why(it).join(', ')]));
 
