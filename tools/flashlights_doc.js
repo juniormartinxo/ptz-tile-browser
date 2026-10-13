@@ -30,8 +30,8 @@ if (noLight.length) throw new Error('lanternas sem LightStrength: ' + noLight.ma
 // O jogo nao agrupa as lanternas: a tabela e mantida aqui. Uma lanterna que nenhuma classe reconhece, ou uma classe sem
 // lanternas, faz o script falhar, para a tabela nao ficar para tras quando os dados mudarem.
 const CLASS_RULES = [
-  ['De mão', it => it.type === 'drainable' && yes(it.props.TorchCone), '`drainable` com `TorchCone = true`'],
-  ['Ambiente', it => it.type === 'drainable' && !yes(it.props.TorchCone), '`drainable` com `TorchCone = false`'],
+  ['Com feixe', it => it.type === 'drainable' && yes(it.props.TorchCone), '`drainable` com `TorchCone = true`'],
+  ['Sem feixe', it => it.type === 'drainable' && !yes(it.props.TorchCone), '`drainable` com `TorchCone = false`'],
   ['Para arma', it => it.type === 'weaponpart', '`weaponpart`'],
 ];
 const CLASSES = CLASS_RULES.map(c => c[0]);
@@ -59,23 +59,26 @@ const nOvr = F.filter(it => it.ovr.length).length;
 const byName = (a, b) => (a.pt || a.en || a.id).localeCompare(b.pt || b.en || b.id);
 const maxBy = (list, f) => list.reduce((m, it) => (f(it) > f(m) ? it : m));
 const far = maxBy(F, it => num(it.props.LightDistance));
-// a busca tag:flashlight da aba Itens compara por trecho, sem o prefixo base: (ve items.js)
-const tagSearch = D.items.filter(it => tags(it).some(t => t.replace(/^base:/i, '').toLowerCase().includes('flashlight')));
+// a busca tag:flashlight da aba Itens compara por trecho, sem o prefixo base:, e esconde os ocultos (ve items.js)
+const tagSearch = D.items.filter(it => !hidden(it) && tags(it).some(t => t.replace(/^base:/i, '').toLowerCase().includes('flashlight')));
+const otherFlashTags = Object.keys(byTag).map(t => t.replace(/^\w+:/, '')).filter(t => t.toLowerCase() !== 'flashlight');
 const tagSearchExtra = tagSearch.filter(it => !isFlashlight(it));
-// fora do catalogo: outras fontes de luz (LightStrength sem a tag) e itens com lanterna/flashlight/lantern no ID ou no nome
-const NAME_RE = /flashlight|lantern/i;
-const outside = D.items.filter(it => !isFlashlight(it) && (it.props.LightStrength || NAME_RE.test([it.id, it.en, it.pt].join(' '))));
-const outsideLight = outside.filter(it => it.props.LightStrength);
-const unlit = outside.filter(it => !it.props.LightStrength && tags(it).some(t => /unlitlantern/i.test(t)));
 // o filtro "Categoria" da barra lateral: quanto a categoria principal das lanternas traz alem delas, e quais lanternas ficam fora
-const mainCat = Object.entries(F.reduce((o, it) => (inc(o, it.cat), o), {})).sort((a, b) => b[1] - a[1])[0][0];
+const mainCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0][0];
 const catOthers = D.items.filter(it => it.cat === mainCat && !isFlashlight(it) && !hidden(it)).length;
+// fora do catalogo: itens sem a tag com LightStrength, na categoria principal das lanternas ou com flashlight/lantern no ID ou no nome
+const NAME_RE = /flashlight|lantern/i;
+const WHY = [['`LightStrength`', it => it.props.LightStrength], ['categoria', it => it.cat === mainCat], ['nome', it => NAME_RE.test([it.id, it.en, it.pt].join(' '))]];
+const why = it => WHY.filter(([, f]) => f(it)).map(w => w[0]);
+const outside = D.items.filter(it => !isFlashlight(it) && why(it).length);
+const outsideLight = outside.filter(it => it.props.LightStrength);
+const lanternTags = outside.filter(it => tags(it).some(t => /^(\w+:)?(un)?litlantern$/i.test(t)));
 const catMissing = F.filter(it => it.cat !== mainCat);
 
 // ---------- markdown ----------
 const out = [];
 const p = (...l) => out.push(...l);
-const RIGHT = /^(Lanternas|Itens|Força|Alcance|Feixe|Consumo|Peso)$/;
+const RIGHT = /^(Lanternas|Força|Alcance|Feixe|Consumo|Peso)$/;
 const table = (head, rows) => { p('| ' + head.join(' | ') + ' |', '| ' + head.map(h => RIGHT.test(h) || CLASSES.includes(h) ? '---:' : '---').join(' | ') + ' |'); rows.forEach(r => p('| ' + r.map(cell).join(' | ') + ' |')); p(''); };
 // ancora do GitHub: mantem letras acentuadas, nao as troca pela letra sem acento
 const anchor = s => s.toLowerCase().replace(/[^\p{L}\p{N}_ -]/gu, '').replace(/ /g, '-');
@@ -86,16 +89,16 @@ const dash = v => v ? num(v) : '—';
 
 p('# Lanternas', '',
   '> Gerado por `node tools/flashlights_doc.js` a partir de `data/items.js` (extraído em ' + D.generated.slice(0, 10) + '). Não edite à mão: rode `node build_items.js` e depois o script para atualizar.', '',
-  'Uma **lanterna** é um item de script (`media/scripts`) com a tag `flashlight` em `Tags` (`base:flashlight` no jogo base; um mod pode declará-la sem o prefixo). São as lanternas de mão, a lanterna elétrica improvisada e as lanternas que se montam em armas. Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.HandTorch`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.HandTorch")`.', '',
+  'Uma **lanterna** é um item de script (`media/scripts`) com a tag `flashlight` em `Tags` (`base:flashlight` no jogo base; um mod pode declará-la sem o prefixo). ' + `Elas se dividem em ${CLASSES.map(c => '"' + c + '"').join(', ').replace(/, ([^,]*)$/, ' e $1')} (veja [Por classe](#por-classe)). ` + 'Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.HandTorch`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.HandTorch")`.', '',
   `Total mapeado: **${fmt(F.length)} lanternas** de ${fmt(srcOrder.length)} origens (${fmt(bySrc.vanilla ? bySrc.vanilla.n : 0)} do jogo base), ${fmt(withPt)} com nome em PT-BR, ${fmt(nOvr)} ${nOvr === 1 ? 'alterada' : 'alteradas'} por outro mod e ${fmt(nHidden)} ${nHidden === 1 ? 'oculta' : 'ocultas'} por padrão na aba Itens. A de maior alcance é ${name(far)} (\`${far.id}\`), com \`LightDistance\` ${num(far.props.LightDistance)}.`, '',
-  `As outras ${fmt(outsideLight.length)} fontes de luz (itens com \`LightStrength\` sem a tag) e os itens que só têm "flashlight" ou "lantern" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).`, '',
+  `As outras ${fmt(outsideLight.length)} fontes de luz (itens com \`LightStrength\` sem a tag), os demais itens da categoria ${catLabel(mainCat)} e os itens que só têm "flashlight" ou "lantern" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).`, '',
   '## Como as lanternas são mapeadas', '',
   '`build_items.js` lê os blocos `item` de todo `media/scripts/**/*.txt`, primeiro do jogo base e depois dos mods (de cada mod, a maior pasta `42.x` que não passa de `GAME_VER`, mais `common/`; sem pasta de versão, `media/`):', '',
   '1. **Propriedades**: cada `chave = valor` do bloco vira uma string em `props`, sem conversão de tipo (`"15"`, `"0.66"`, `"true"`).',
   '2. **Mods que redefinem um item**: se um mod declara um ID que já existe, as propriedades dele são mescladas por cima das anteriores e o nome do mod entra em `ovr`; a origem (`mod`) continua sendo quem o definiu primeiro.',
   '3. **Nomes**: `pt` e `en` vêm de `ItemName` em `Translate/PTBR` e `Translate/EN`, do jogo base e dos mods. Sem tradução EN, `en` cai em `DisplayName`.',
   '4. **Ícone**: o primeiro de `Icon`, `IconsForTexture`, `IconFluid` e o nome do item que for achado, como `Item_<nome>` ou `<nome>`, nos packs de textura lidos (`UI`, `UI2`, `IconsMoveables`, `RadioIcons`, `ApComUI` e os `pack=` dos mods) ou nos `.png` soltos de `media/textures`. Sem nenhum, um item com `WorldObjectSprite` usa o sprite do tile.', '',
-  `Na aba Itens, a busca \`tag:flashlight\` traz ${tagSearchExtra.length ? `${fmt(tagSearch.length)} itens: as lanternas e mais ${tagSearchExtra.map(it => '`' + it.id + '`').join(', ')}` : 'exatamente as lanternas'} (a comparação é por trecho, sem o prefixo \`base:\` e sem diferenciar maiúsculas; \`flashlightpillar\` também casa). O filtro "Categoria → ${catLabel(mainCat)}" da barra lateral traz mais ${fmt(catOthers)} itens que não são lanternas` +
+  `Na aba Itens, a busca \`tag:flashlight\` traz ${tagSearchExtra.length ? `${fmt(tagSearch.length)} itens: as lanternas e mais ${tagSearchExtra.map(it => '`' + it.id + '`').join(', ')}` : 'exatamente as lanternas'} (a comparação é por trecho, sem o prefixo \`base:\` e sem diferenciar maiúsculas${otherFlashTags.length ? '; ' + otherFlashTags.map(t => '\`' + t + '\`').join(', ') + ' também casa' : ''}). O filtro "Categoria → ${catLabel(mainCat)}" da barra lateral traz mais ${fmt(catOthers)} itens que não são lanternas` +
   (catMissing.length ? ` e deixa de fora ${fmt(catMissing.length)} lanternas (${[...new Set(catMissing.map(it => catLabel(it.cat)))].join(', ')})` : '') + '.', '',
   '## Formato de `data/items.js`', '',
   'As lanternas ficam junto com os demais itens:', '',
@@ -148,10 +151,11 @@ for (const c of CLASSES) {
 }
 
 p('## Fora do catálogo', '',
-  `Itens sem a tag \`flashlight\` que têm \`LightStrength\` (${fmt(outsideLight.length)}) ou que têm "flashlight" ou "lantern" no ID ou no nome (${fmt(outside.length - outsideLight.length)})` +
-  (unlit.length ? `, entre eles ${fmt(unlit.length)} lampiões apagados (tag \`unlitlantern\`), que não têm \`LightStrength\`` : '') + '. Força e alcance são `LightStrength` e `LightDistance` (— quando faltam).', '');
-table(['Nome', 'ID', 'Origem', 'Tipo', 'Categoria', 'Força', 'Alcance'], outside.sort((a, b) => !!b.props.LightStrength - !!a.props.LightStrength || byName(a, b)).map(it => [
-  label(it), '`' + it.id + '`', origin(it), '`' + it.type + '`', catLabel(it.cat), dash(it.props.LightStrength), dash(it.props.LightDistance)]));
+  `Itens sem a tag \`flashlight\` que têm \`LightStrength\`, que estão na categoria \`${mainCat}\` (${catLabel(mainCat)}) ou que têm "flashlight" ou "lantern" no ID ou no nome: ${fmt(outside.length)} itens, ${fmt(outsideLight.length)} deles com \`LightStrength\`. "Por quê" diz qual dos três critérios o item cumpre.` +
+  (lanternTags.length ? ` Os ${fmt(lanternTags.length)} com a tag \`litlantern\` ou \`unlitlantern\` são os que o jogo chama de ${[...new Set(lanternTags.map(it => (it.pt || it.en).replace(/\s*[-(].*$/, '')))].map(n => '"' + n + '"').join(', ')} em PT-BR.` : '') +
+  ' Força e alcance são `LightStrength` e `LightDistance` (— quando faltam).', '');
+table(['Nome', 'ID', 'Origem', 'Tipo', 'Categoria', 'Força', 'Alcance', 'Por quê'], outside.sort((a, b) => !!b.props.LightStrength - !!a.props.LightStrength || byName(a, b)).map(it => [
+  label(it), '`' + it.id + '`', origin(it), '`' + it.type + '`', catLabel(it.cat), dash(it.props.LightStrength), dash(it.props.LightDistance), why(it).join(', ')]));
 
 const file = path.join(ROOT, 'docs/flashlights.md');
 fs.writeFileSync(file, out.join('\n'));

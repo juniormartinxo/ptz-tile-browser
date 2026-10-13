@@ -2,11 +2,11 @@
 
 > Gerado por `node tools/flashlights_doc.js` a partir de `data/items.js` (extraído em 2026-09-28). Não edite à mão: rode `node build_items.js` e depois o script para atualizar.
 
-Uma **lanterna** é um item de script (`media/scripts`) com a tag `flashlight` em `Tags` (`base:flashlight` no jogo base; um mod pode declará-la sem o prefixo). São as lanternas de mão, a lanterna elétrica improvisada e as lanternas que se montam em armas. Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.HandTorch`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.HandTorch")`.
+Uma **lanterna** é um item de script (`media/scripts`) com a tag `flashlight` em `Tags` (`base:flashlight` no jogo base; um mod pode declará-la sem o prefixo). Elas se dividem em "Com feixe", "Sem feixe" e "Para arma" (veja [Por classe](#por-classe)). Cada uma é identificada por `<Módulo>.<Nome>`, ex.: `Base.HandTorch`; é esse ID que o jogo usa, ex.: `getPlayer():getInventory():AddItem("Base.HandTorch")`.
 
 Total mapeado: **11 lanternas** de 3 origens (8 do jogo base), 8 com nome em PT-BR, 3 alteradas por outro mod e 0 ocultas por padrão na aba Itens. A de maior alcance é _Tactical Flashlight_ (`Base.KATTAJ1_TacticalFlashlight`), com `LightDistance` 28.
 
-As outras 10 fontes de luz (itens com `LightStrength` sem a tag) e os itens que só têm "flashlight" ou "lantern" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).
+As outras 10 fontes de luz (itens com `LightStrength` sem a tag), os demais itens da categoria Fonte de Luz e os itens que só têm "flashlight" ou "lantern" no ID ou no nome ficam fora do catálogo (veja [Fora do catálogo](#fora-do-catálogo)).
 
 ## Como as lanternas são mapeadas
 
@@ -49,13 +49,13 @@ A classe não é um campo do jogo: é dada pelo tipo do item e por `TorchCone`, 
 
 | Classe | Regra | Lanternas | Força | Alcance |
 | --- | --- | ---: | ---: | ---: |
-| [De mão](#de-mão) | `drainable` com `TorchCone = true` | 7 | 1.2–3 | 11–28 |
-| [Ambiente](#ambiente) | `drainable` com `TorchCone = false` | 1 | 1.5 | 10 |
+| [Com feixe](#com-feixe) | `drainable` com `TorchCone = true` | 7 | 1.2–3 | 11–28 |
+| [Sem feixe](#sem-feixe) | `drainable` com `TorchCone = false` | 1 | 1.5 | 10 |
 | [Para arma](#para-arma) | `weaponpart` | 3 | 1.3–1.8 | 15 |
 
 ## Por origem
 
-| Origem | Lanternas | De mão | Ambiente | Para arma |
+| Origem | Lanternas | Com feixe | Sem feixe | Para arma |
 | --- | ---: | ---: | ---: | ---: |
 | vanilla | 8 | 6 | 1 | 1 |
 | Firearms B42 | 2 | 0 | 0 | 2 |
@@ -112,7 +112,7 @@ As 31 chaves que aparecem em `props` das lanternas, da mais comum à mais rara. 
 
 Todas as lanternas por classe, do maior alcance para o menor e depois em ordem alfabética. "Nome" é o nome em PT-BR; em itálico quando só há o inglês e em `código` quando não há nenhum. "(oculta)" marca as que a aba Itens esconde por padrão (categoria interna ou `OBSOLETE`). As colunas mostram as propriedades cruas: força é `LightStrength`, alcance é `LightDistance`, feixe é `TorchDot` (— quando falta), consumo é `UseDelta` e peso é `Weight`. "Extras" junta `AttachmentType` ("pendura em"), `PartType` ("peça") e `MountOn` ("monta em").
 
-### De mão
+### Com feixe
 
 | Nome | ID | Origem | Força | Alcance | Feixe | Consumo | Peso | Extras |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -124,7 +124,7 @@ Todas as lanternas por classe, do maior alcance para o menor e depois em ordem a
 | Lanterna - Improvisada | `Base.Flashlight_Crafted` | vanilla | 1.2 | 11 | 0.66 | 0.008 | 1 | — |
 | Lanterna tipo Caneta | `Base.PenLight` | vanilla | 1.2 | 11 | 0.75 | 0.001 | 0.2 | — |
 
-### Ambiente
+### Sem feixe
 
 | Nome | ID | Origem | Força | Alcance | Feixe | Consumo | Peso | Extras |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -140,27 +140,29 @@ Todas as lanternas por classe, do maior alcance para o menor e depois em ordem a
 
 ## Fora do catálogo
 
-Itens sem a tag `flashlight` que têm `LightStrength` (10) ou que têm "flashlight" ou "lantern" no ID ou no nome (10), entre eles 5 lampiões apagados (tag `unlitlantern`), que não têm `LightStrength`. Força e alcance são `LightStrength` e `LightDistance` (— quando faltam).
+Itens sem a tag `flashlight` que têm `LightStrength`, que estão na categoria `LightSource` (Fonte de Luz) ou que têm "flashlight" ou "lantern" no ID ou no nome: 22 itens, 10 deles com `LightStrength`. "Por quê" diz qual dos três critérios o item cumpre. Os 10 com a tag `litlantern` ou `unlitlantern` são os que o jogo chama de "Lampião" em PT-BR. Força e alcance são `LightStrength` e `LightDistance` (— quando faltam).
 
-| Nome | ID | Origem | Tipo | Categoria | Força | Alcance |
-| --- | --- | --- | --- | --- | ---: | ---: |
-| Isqueiro | `Base.Lighter` | vanilla | `drainable` | Fonte de Fogo | 0.8 | 5 |
-| Isqueiro - Descartável | `Base.LighterDisposable` | vanilla | `drainable` | Fonte de Fogo | 0.6 | 5 |
-| Isqueiro - Para Churrasqueira | `Base.LighterBBQ` | vanilla | `drainable` | Fonte de Fogo | 0.6 | 5 |
-| Lampião - Cobre (Aceso) | `Base.Lantern_Hurricane_CopperLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 |
-| Lampião - Ouro (Aceso) | `Base.Lantern_Hurricane_GoldLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 |
-| Lampião - Prata (Aceso) | `Base.Lantern_Hurricane_SilverLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 |
-| Lampião (Aceso) | `Base.Lantern_Hurricane_ForgedLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 |
-| Lampião (Aceso) | `Base.Lantern_HurricaneLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 |
-| Lampião a Propano | `Base.Lantern_Propane` | vanilla | `drainable` | Fonte de Luz | 2 | 15 |
-| Vela Acesa | `Base.CandleLit` | vanilla | `drainable` | Fonte de Luz | 1.2 | 5 |
-| Abóbora de Halloween | `Base.HalloweenPumpkin` | vanilla | `food` | Comida | — | — |
-| Cilindro de Propano para Lampião | `Base.Propane_Refill` | vanilla | `drainable` | Fonte de Luz | — | — |
-| _Flashlight Suppressor_ | `Base.ImprovisedSilencer` | Firearms B42 (alterada por Firearms B42 Beta) | `weaponpart` | Peça de Arma | — | — |
-| _Flashlight Suppressor(Broken)_ | `Base.ImprovisedSilencer_Broken` | Firearms B42 (alterada por Firearms B42 Beta) | `normal` | Peça de Arma | — | — |
-| Lampião | `Base.Lantern_Hurricane` | vanilla | `drainable` | Fonte de Luz | — | — |
-| Lampião | `Base.Lantern_Hurricane_Forged` | vanilla | `drainable` | Fonte de Luz | — | — |
-| Lampião - Cobre | `Base.Lantern_Hurricane_Copper` | vanilla | `drainable` | Fonte de Luz | — | — |
-| Lampião - Ouro | `Base.Lantern_Hurricane_Gold` | vanilla | `drainable` | Fonte de Luz | — | — |
-| Lampião - Prata | `Base.Lantern_Hurricane_Silver` | vanilla | `drainable` | Fonte de Luz | — | — |
-| Vidro de Lanterna | `Base.LanternGlass` | vanilla | `normal` | Material | — | — |
+| Nome | ID | Origem | Tipo | Categoria | Força | Alcance | Por quê |
+| --- | --- | --- | --- | --- | ---: | ---: | --- |
+| Isqueiro | `Base.Lighter` | vanilla | `drainable` | Fonte de Fogo | 0.8 | 5 | `LightStrength` |
+| Isqueiro - Descartável | `Base.LighterDisposable` | vanilla | `drainable` | Fonte de Fogo | 0.6 | 5 | `LightStrength` |
+| Isqueiro - Para Churrasqueira | `Base.LighterBBQ` | vanilla | `drainable` | Fonte de Fogo | 0.6 | 5 | `LightStrength` |
+| Lampião - Cobre (Aceso) | `Base.Lantern_Hurricane_CopperLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 | `LightStrength`, categoria, nome |
+| Lampião - Ouro (Aceso) | `Base.Lantern_Hurricane_GoldLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 | `LightStrength`, categoria, nome |
+| Lampião - Prata (Aceso) | `Base.Lantern_Hurricane_SilverLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 | `LightStrength`, categoria, nome |
+| Lampião (Aceso) | `Base.Lantern_Hurricane_ForgedLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 | `LightStrength`, categoria, nome |
+| Lampião (Aceso) | `Base.Lantern_HurricaneLit` | vanilla | `drainable` | Fonte de Luz | 1.5 | 15 | `LightStrength`, categoria, nome |
+| Lampião a Propano | `Base.Lantern_Propane` | vanilla | `drainable` | Fonte de Luz | 2 | 15 | `LightStrength`, categoria, nome |
+| Vela Acesa | `Base.CandleLit` | vanilla | `drainable` | Fonte de Luz | 1.2 | 5 | `LightStrength`, categoria |
+| Abóbora de Halloween | `Base.HalloweenPumpkin` | vanilla | `food` | Comida | — | — | nome |
+| Caixa de Velas | `Base.CandleBox` | vanilla | `normal` | Fonte de Luz | — | — | categoria |
+| Cilindro de Propano para Lampião | `Base.Propane_Refill` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| _Flashlight Suppressor_ | `Base.ImprovisedSilencer` | Firearms B42 (alterada por Firearms B42 Beta) | `weaponpart` | Peça de Arma | — | — | nome |
+| _Flashlight Suppressor(Broken)_ | `Base.ImprovisedSilencer_Broken` | Firearms B42 (alterada por Firearms B42 Beta) | `normal` | Peça de Arma | — | — | nome |
+| Lampião | `Base.Lantern_Hurricane` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| Lampião | `Base.Lantern_Hurricane_Forged` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| Lampião - Cobre | `Base.Lantern_Hurricane_Copper` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| Lampião - Ouro | `Base.Lantern_Hurricane_Gold` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| Lampião - Prata | `Base.Lantern_Hurricane_Silver` | vanilla | `drainable` | Fonte de Luz | — | — | categoria, nome |
+| Vela | `Base.Candle` | vanilla | `drainable` | Fonte de Luz | — | — | categoria |
+| Vidro de Lanterna | `Base.LanternGlass` | vanilla | `normal` | Material | — | — | nome |
